@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "source": "functions"
+  },
+  "hosting": {
+    "source": "client",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
