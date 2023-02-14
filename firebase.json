@@ -1,7 +1,4 @@
 {
-  "functions": {
-    "source": "functions"
-  },
   "hosting": {
     "source": "client",
     "ignore": [
