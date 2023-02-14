@@ -23,3 +23,5 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ARITHYNET }}'
           channelId: live
           projectId: arithynet
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
