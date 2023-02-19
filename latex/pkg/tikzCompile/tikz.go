@@ -2,14 +2,17 @@ package tikz
 
 import (
 	"log"
-	"os"
 	"os/exec"
-	"strings"
+    "io/ioutil"
 )
 
 func Compile(txt string) {
-    cmd := exec.Command("uplatex")
-    cmd.Stdin = strings.NewReader(txt)
+    err := ioutil.WriteFile("./src/index.tex", []byte(txt), 0644)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    cmd := exec.Command("./tectonic", "--appimage-extract-and-run", "-X", "build")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 	    log.Printf("%s\n", stdoutStderr)
@@ -18,7 +21,7 @@ func Compile(txt string) {
 }
 
 func pdf2svg() {
-    cmd := exec.Command("pdftocairo", "-svg", "texput.pdf")
+    cmd := exec.Command("pdftocairo", "-svg", "./build/default/default.pdf")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 	    log.Printf("%s\n", stdoutStderr)
@@ -36,41 +39,13 @@ func xdv2svg() {
 }
 
 func TikzWrapper(txt string) string {
-    var tikzPreamble = `
-\documentclass[ja=standard,autodetect-engine,dvipdfmx-if-dvi]{bxjsarticle}
-%\documentclass[dvipdfmx,uplatex]{jsarticle}
-% -------- maths ---------
-\usepackage{amsmath, amssymb}
-\usepackage{bm}
+    Compile(txt)
+    pdf2svg()
+    //xdv2svg()
 
-% -------- images ---------
-\usepackage{graphicx}
-\usepackage[dvipsnames,table]{xcolor}
-\usepackage{pgf}
-\usepackage{tikz}
-\usetikzlibrary{arrows,automata}
-
-\begin{document}
-    `
-
-    var tikzPostamble = `
-\end{document}
-    `
-
-    Compile(tikzPreamble + txt + tikzPostamble)
-    //pdf2svg()
-    xdv2svg()
-
-    f,err := os.Open("texput.svg")
+    f,err := ioutil.ReadFile("default.svg")
     if err != nil {
-        log.Println(err)
+        log.Fatal(err)
     }
-    defer f.Close()
-
-    buf := make([]byte, 1024*10)
-    _, err = f.Read(buf)
-    if err != nil {
-        log.Println(err)
-    }
-    return string(buf)
+    return string(f)
 }
