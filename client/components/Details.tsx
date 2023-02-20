@@ -8,9 +8,10 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import Stack from '@mui/material/Stack';
-import type { PostProps } from '../organisms/Post'
 
-type DetailsProps = PostProps
+interface DetailsProps {
+  postId: number
+}
 
 const Details = (props: DetailsProps) => {
   const [open, setOpen] = useState<boolean>(false);

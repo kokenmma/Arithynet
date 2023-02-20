@@ -1,11 +1,7 @@
-import Post from '../components/organisms/Post'
+import Post from '../components/Post'
 
 export default function IndexPage() {
     return (
-        <Post
-            photoURL='' userName="testuser" userId='123456abc' postHTML={<span>Welcome to UEC!!</span>}
-            replyCount={1} repostCount={2} favCount={3} postTime="February 20, 2023"
-            isFavedByU={true} isRepostedByU={true}
-        />
+        <Post postId={1234567} />
     )
 }
