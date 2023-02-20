@@ -14,13 +14,13 @@ type Data struct {
 	Code string `json:"code"`
 }
 
+func NewData(txt string) *Data {
+	return &Data{Code: txt}
+}
+
 type StatusResponse struct {
 	Status        string `json:"status"`
 	InternalError error  `json:"internalerror,omitempty"`
-}
-
-func NewData(txt string) *Data {
-	return &Data{Code: txt}
 }
 
 func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -36,9 +36,20 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		data := NewData(string(body))
-		// log.Println(data.Code)
-		if err := json.NewEncoder(w).Encode(NewData(tikz.TikzWrapper(data.Code))); err != nil {
+
+		code := tikz.NewTikz(string(body))
+		svg, err := code.MakeDir().Compile().Pdf2svg().SvgString()
+		defer code.RmoveDir()
+		if err != nil {
+			log.Println(err)
+			if err := json.NewEncoder(w).Encode(&StatusResponse{Status: "err", InternalError: err}); err != nil {
+				log.Println(err)
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if err := json.NewEncoder(w).Encode(NewData(svg)); err != nil {
 			log.Println(err)
 			if err := json.NewEncoder(w).Encode(StatusResponse{Status: "err", InternalError: err}); err != nil {
 				log.Println(err)

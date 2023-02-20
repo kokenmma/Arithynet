@@ -1,12 +1,12 @@
 package tikz
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
-	"sync"
 )
 
 type Tikz struct {
@@ -16,7 +16,6 @@ type Tikz struct {
 	dirname      string
 	svg          string
 	stdoutStderr string
-	sync.RWMutex
 }
 
 func NewTikz(index string) *Tikz {
@@ -81,13 +80,14 @@ func (t *Tikz) Pdf2svg() *Tikz {
 	return t
 }
 
-func (t *Tikz) SvgString() string {
+func (t *Tikz) SvgString() (string, error) {
 	f, err := ioutil.ReadFile(t.dirname + "/texput.svg")
 	if err != nil {
 		log.Println(err)
-		return ""
+		var stdOE = errors.New(t.stdoutStderr)
+		return "", stdOE
 	}
-	return string(f)
+	return string(f), nil
 }
 
 func (t *Tikz) RmoveDir() *Tikz {
@@ -101,7 +101,7 @@ func (t *Tikz) RmoveDir() *Tikz {
 
 func TikzWrapper(index string) string {
 	res := NewTikz(index)
-	svg := res.MakeDir().Compile().Pdf2svg().SvgString()
+	svg, _ := res.MakeDir().Compile().Pdf2svg().SvgString()
 	res.RmoveDir()
 	return svg
 }
