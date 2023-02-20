@@ -9,14 +9,16 @@ import (
 func Compile(txt string) {
 	err := ioutil.WriteFile("./src/index.tex", []byte(txt), 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 
 	cmd := exec.Command("tectonic", "-X", "build")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("%s\n", stdoutStderr)
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 }
 
@@ -25,7 +27,8 @@ func pdf2svg() {
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("%s\n", stdoutStderr)
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 }
 
@@ -34,7 +37,8 @@ func xdv2svg() {
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("%s\n", stdoutStderr)
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 }
 
@@ -45,7 +49,8 @@ func TikzWrapper(txt string) string {
 
 	f, err := ioutil.ReadFile("default.svg")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+        return ""
 	}
 	return string(f)
 }
