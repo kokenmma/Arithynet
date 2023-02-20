@@ -30,10 +30,10 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			if err := json.NewEncoder(w).Encode(StatusResponse{Status: "err", InternalError: err}); err != nil {
 				log.Println(err)
 			}
-			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -42,22 +42,22 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		defer code.RmoveDir()
 		if err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			if err := json.NewEncoder(w).Encode(&StatusResponse{Status: "err", InternalError: err}); err != nil {
 				log.Println(err)
 			}
-			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(NewData(svg)); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			if err := json.NewEncoder(w).Encode(StatusResponse{Status: "err", InternalError: err}); err != nil {
 				log.Println(err)
 			}
-			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 	default:
 		if err := json.NewEncoder(w).Encode(StatusResponse{Status: "permits only POST"}); err != nil {
 			log.Println(err)
