@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -10,10 +11,18 @@ import CreateIcon from '@mui/icons-material/Create';
 import Badge from '@mui/material/Badge';
 import Divider from '@mui/material/Divider';
 import Fab from '@mui/material/Fab';
+import Modal from '@mui/material/Modal';
+import CreatingPost from './CreatingPost';
 
 const LeftMenuBar = () => {
   // DB から通知数を取得
   let notificationCount = 1;
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
   return (
     <>
       <List>
@@ -46,10 +55,18 @@ const LeftMenuBar = () => {
           </ListItemButton>
         </ListItem>
       </List>
-      <Fab color='primary' area-label='create post'>
+      <Fab color='primary' onClick={handleOpen} area-label='create post'>
         <CreateIcon />
         Post
       </Fab>
+      <Modal
+        open={isOpen}
+        onClose={handleClose}
+        aria-labelledby='modal-modal-title'
+        aria-describedby='modal-modal-description'
+      >
+        <CreatingPost />
+      </Modal>
     </>
   );
 };

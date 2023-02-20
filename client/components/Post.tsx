@@ -19,9 +19,21 @@ import Details from './Details';
 
 export interface PostProps {
   postId: number;
+  photoURL: string;
+  userName: string;
+  userId: string;
+  postText: string;
+  replyCount: number;
+  repostCount: number;
+  favCount: number;
+  postTime: number;
+  isFavedByU: number;
+  isRepostedByU: number;
 }
 
 const Post = (props: PostProps) => {
+  // render() の実装は以下の通りにする
+
   // services/get-post.ts を使って，postId から photoURL，username，postText などを読みだす．
   // postText を TikZ の部分で分割する．
 
@@ -30,38 +42,32 @@ const Post = (props: PostProps) => {
   // それらをくっつけて postHTML を作る
 
   // timestamp が返ってくるので，それから投稿日時の文字列 postTime を作る
-  let photoURL = '';
-  let userName = 'testuser';
-  let userId = '123456abc';
-  let postHTML: JSX.Element = <span>Welcome to UEC!</span>;
-  let replyCount = 1;
-  let repostCount = 2;
-  let favCount = 3;
-  let postTime = 'February 20, 2023';
-  let isFavedByU = true;
-  let isRepostedByU = true;
+
+  // let postHTML: JSX.Element = useMemo(() => render(postText), [postText])
+  let postHTML = <></>;
+
   return (
     <Card sx={{ maxWidth: 700 }}>
       <CardHeader
-        avatar={<Avatar src={photoURL} aria-label='icon' />}
+        avatar={<Avatar src={props.photoURL} aria-label='icon' />}
         action={<Details postId={props.postId} />}
-        title={userName + '@' + userId}
-        subheader={postTime}
+        title={props.userName + '@' + props.userId}
+        subheader={props.postTime}
       />
       <CardContent>{postHTML}</CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label='reply'>
           <ReplyIcon />
         </IconButton>
-        <Typography variant='body2'>{replyCount}</Typography>
+        <Typography variant='body2'>{props.replyCount}</Typography>
         <IconButton aria-label='repost'>
           <RepeatIcon />
         </IconButton>
-        <Typography variant='body2'>{repostCount}</Typography>
+        <Typography variant='body2'>{props.repostCount}</Typography>
         <IconButton aria-label='favorite'>
           <FavoriteIcon />
         </IconButton>
-        <Typography variant='body2'>{favCount}</Typography>
+        <Typography variant='body2'>{props.favCount}</Typography>
         <IconButton aria-label='share'>
           <ShareIcon />
         </IconButton>
