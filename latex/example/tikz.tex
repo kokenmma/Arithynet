@@ -1,12 +1,3 @@
-package main
-
-import (
-	"fmt"
-	"github.com/Arithynet/latex/pkg/tikzCompile"
-)
-
-func main() {
-	svg := tikz.TikzWrapper(`
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
                     semithick]
   %\tikzstyle{every state}=[]
@@ -26,6 +17,3 @@ func main() {
         (pt)    edge [bend left]        node {0} (pq)
                 edge                    node {1} (p);
 \end{tikzpicture}
-    `)
-	fmt.Println(svg)
-}
