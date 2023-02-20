@@ -1,1 +1,9 @@
-export default function CreatingPost() {}
+interface CreatingPostProps {
+
+}
+
+const CreatingPost = (props: CreatingPostProps) => {
+    return <></>
+}
+
+export default CreatingPost

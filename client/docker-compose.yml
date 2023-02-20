@@ -7,10 +7,10 @@ services:
         container_name: Arithynet
         volumes:
             - .:/var/www/html
-            - node_modules:/var/www/html/node_modules
+            #- node_modules:/var/www/html/node_modules
         ports:
             - 3000:3000
         #command: sh -c "yarn build && yarn start"
         tty: true
-volumes:
-    node_modules:
+#volumes:
+    #node_modules:
