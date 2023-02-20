@@ -1,9 +1,7 @@
-import Link from 'next/link'
+import Post from '../components/Post'
 
 export default function IndexPage() {
-  return (
-    <div>
-      Welcomr to UEC! <Link href="/about">About</Link>
-    </div>
-  )
+    return (
+        <Post postId={1234567} />
+    )
 }

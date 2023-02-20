@@ -10,7 +10,7 @@ services:
             - node_modules:/var/www/html/node_modules
         ports:
             - 3000:3000
-        command: sh -c "yarn build && yarn start"
+        #command: sh -c "yarn build && yarn start"
         tty: true
 volumes:
     node_modules:
