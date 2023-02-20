@@ -3,54 +3,105 @@ package tikz
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
+	"strings"
+	"sync"
 )
 
-func Compile(txt string) {
-	err := ioutil.WriteFile("./src/index.tex", []byte(txt), 0644)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+type Tikz struct {
+	preamble     string
+	index        string
+	postamble    string
+	dirname      string
+	svg          string
+	stdoutStderr string
+	sync.RWMutex
+}
 
-	cmd := exec.Command("tectonic", "-X", "build")
+func NewTikz(index string) *Tikz {
+	return &Tikz{
+		preamble: `\documentclass[xelatex,ja=standard]{bxjsarticle}
+% -------- maths ---------
+\usepackage{amsmath, amssymb}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{mathtools}
+\usepackage{physics}
+
+% -------- images ---------
+\usepackage{graphicx}
+\usepackage[dvipsnames,table]{xcolor}
+\usepackage{float}
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+
+\begin{document}
+`,
+		index: index,
+		postamble: `
+\end{document}`,
+	}
+}
+
+func (t *Tikz) MakeDir() *Tikz {
+	dir, err := os.MkdirTemp("", "tikz")
+	if err != nil {
+		log.Println("MakeDir err")
+		log.Println(err)
+		return t
+	}
+	t.dirname = dir
+	return t
+}
+
+func (t *Tikz) Compile() *Tikz {
+	cmd := exec.Command("tectonic", "-X", "compile", "-o", t.dirname, "-")
+	cmd.Stdin = strings.NewReader(t.preamble + t.index + t.postamble)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("%s\n", stdoutStderr)
 		log.Println(err)
-		return
+		t.stdoutStderr += string(stdoutStderr)
+		return t
 	}
+	return t
 }
 
-func pdf2svg() {
-	cmd := exec.Command("pdftocairo", "-svg", "./build/default/default.pdf")
+func (t *Tikz) Pdf2svg() *Tikz {
+	cmd := exec.Command("pdftocairo", "-svg", t.dirname+"/texput.pdf", t.dirname+"/texput.svg")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("%s\n", stdoutStderr)
 		log.Println(err)
-		return
+		t.stdoutStderr += string(stdoutStderr)
+		return t
 	}
+	return t
 }
 
-func xdv2svg() {
-	cmd := exec.Command("dvisvgm", "texput.dvi")
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Printf("%s\n", stdoutStderr)
-		log.Println(err)
-		return
-	}
-}
-
-func TikzWrapper(txt string) string {
-	Compile(txt)
-	pdf2svg()
-	//xdv2svg()
-
-	f, err := ioutil.ReadFile("default.svg")
+func (t *Tikz) SvgString() string {
+	f, err := ioutil.ReadFile(t.dirname + "/texput.svg")
 	if err != nil {
 		log.Println(err)
-        return ""
+		return ""
 	}
 	return string(f)
+}
+
+func (t *Tikz) RmoveDir() *Tikz {
+	err := os.RemoveAll(t.dirname)
+	if err != nil {
+		log.Println("RmoveDir err")
+		log.Println(err)
+	}
+	return t
+}
+
+func TikzWrapper(index string) string {
+	res := NewTikz(index)
+	svg := res.MakeDir().Compile().Pdf2svg().SvgString()
+	res.RmoveDir()
+	return svg
 }
