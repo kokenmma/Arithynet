@@ -18,6 +18,9 @@ import Fab from '@mui/material/Fab';
 import Modal from '@mui/material/Modal';
 import CreatingPost from './CreatingPost';
 
+export const LeftMenuBarWidthWhenGreaterThanMd = 240;
+export const LeftMenuBarWidthWhenLessThanMd = 50;
+
 const LeftMenuBar = () => {
   // DB から通知数を取得
   let notificationCount = 1;
@@ -30,50 +33,55 @@ const LeftMenuBar = () => {
   const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   return (
-    <Stack divider={<Divider flexItem />}>
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <HomeOutlinedIcon />
-            </ListItemIcon>
-            {matches && <ListItemText primary='Home' />}
-          </ListItemButton>
-        </ListItem>
-        <Divider />
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <Badge badgeContent={notificationCount} color='secondary'>
-                <NotificationsNoneOutlinedIcon />
-              </Badge>
-            </ListItemIcon>
-            {matches && <ListItemText primary='Notification' />}
-          </ListItemButton>
-        </ListItem>
-        <Divider />
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <BookmarkBorderOutlinedIcon />
-            </ListItemIcon>
-            {matches && <ListItemText primary='Bookmarks' />}
-          </ListItemButton>
-        </ListItem>
-      </List>
-      <Fab variant='extended' color='primary' onClick={handleOpen} area-label='create post'>
-        <CreateIcon />
-        {matches && 'Post'}
-      </Fab>
-      <Modal
-        open={isOpen}
-        onClose={handleClose}
-        aria-labelledby='modal-modal-title'
-        aria-describedby='modal-modal-description'
-      >
-        <CreatingPost />
-      </Modal>
-    </Stack>
+    <Box
+      sx={{
+        width: matches ? LeftMenuBarWidthWhenGreaterThanMd : LeftMenuBarWidthWhenLessThanMd,
+        flexShrink: { md: 0 },
+      }}
+    >
+      <Stack divider={<Divider flexItem />}>
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <HomeOutlinedIcon />
+              </ListItemIcon>
+              {matches && <ListItemText primary='Home' />}
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <Badge badgeContent={notificationCount} color='secondary'>
+                  <NotificationsNoneOutlinedIcon />
+                </Badge>
+              </ListItemIcon>
+              {matches && <ListItemText primary='Notification' />}
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <BookmarkBorderOutlinedIcon />
+              </ListItemIcon>
+              {matches && <ListItemText primary='Bookmarks' />}
+            </ListItemButton>
+          </ListItem>
+        </List>
+        <Fab variant='extended' color='primary' onClick={handleOpen} area-label='create post'>
+          <CreateIcon />
+          {matches && 'Post'}
+        </Fab>
+        <Modal
+          open={isOpen}
+          onClose={handleClose}
+          aria-labelledby='modal-modal-title'
+          aria-describedby='modal-modal-description'
+        >
+          <CreatingPost />
+        </Modal>
+      </Stack>
+    </Box>
   );
 };
 

@@ -1,4 +1,5 @@
 import { getCookie } from 'cookies-next';
+import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -12,20 +13,22 @@ import TextareaAutosize from '@mui/base/TextareaAutosize';
 
 const style = {
   position: 'absolute' as 'absolute',
-  top: '25%',
+  top: '20%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 800,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
+  bgcolor: 'background.default',
+  border: 'none',
   boxShadow: 24,
   p: 4,
+  borderRadius: '5%',
 };
 
 const CreatingPost = () => {
+  const theme = useTheme();
   return (
     <Box sx={style}>
-      <Card sx={{ width: 900 }}>
+      <Card>
         <CardHeader
           avatar={<Avatar src={getCookie('photoURL') as string} aria-label='icon' />}
           title={getCookie('userName') + '@' + getCookie('userId')}
@@ -35,7 +38,17 @@ const CreatingPost = () => {
             aria-label='posttext'
             placeholder='投稿を書き込んでください'
             minRows={3}
-            style={{ width: '100%' }}
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              border: 'none',
+              resize: 'none',
+              outline: 'none',
+              backgroundColor: 'inherit',
+              color: theme.palette.text.primary,
+              fontSize: 18,
+              borderRadius: '5%',
+            }}
           />
         </CardContent>
         <CardActions disableSpacing>

@@ -6,6 +6,9 @@ const darkTheme = createTheme({
   palette: {
     mode: 'dark',
   },
+  typography: {
+    fontSize: 16,
+  },
 });
 
 const App = ({ Component, pageProps }: AppProps) => {
