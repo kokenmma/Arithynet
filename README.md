@@ -1,2 +1,3 @@
 # Arithynet
-SNS for math lovers
+
+Arithynetは物理好き・数学好きの人のためのSNSです。Markdownを用いて投稿することが可能で、LaTeXやTikZに対応しているので図をコピペする手間もなくスムーズに議論を進めることが出来ます。
