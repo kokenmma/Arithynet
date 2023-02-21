@@ -26,9 +26,9 @@ export interface PostProps {
   replyCount: number;
   repostCount: number;
   favCount: number;
-  postTime: number;
-  isFavedByU: number;
-  isRepostedByU: number;
+  postTime: string;
+  isFavedByU: boolean;
+  isRepostedByU: boolean;
 }
 
 const Post = (props: PostProps) => {
@@ -44,10 +44,10 @@ const Post = (props: PostProps) => {
   // timestamp が返ってくるので，それから投稿日時の文字列 postTime を作る
 
   // let postHTML: JSX.Element = useMemo(() => render(postText), [postText])
-  let postHTML = <></>;
+  let postHTML: JSX.Element = <span>Welcome to UEC!</span>;
 
   return (
-    <Card sx={{ maxWidth: 700 }}>
+    <Card sx={{ width: 550 }}>
       <CardHeader
         avatar={<Avatar src={props.photoURL} aria-label='icon' />}
         action={<Details postId={props.postId} />}

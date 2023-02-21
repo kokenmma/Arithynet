@@ -8,13 +8,14 @@ import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternate
 import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
+import TextareaAutosize from '@mui/base/TextareaAutosize';
 
 const style = {
   position: 'absolute' as 'absolute',
-  top: '50%',
+  top: '25%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 800,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
@@ -24,13 +25,18 @@ const style = {
 const CreatingPost = () => {
   return (
     <Box sx={style}>
-      <Card sx={{ maxWidth: 900 }}>
+      <Card sx={{ width: 900 }}>
         <CardHeader
           avatar={<Avatar src={getCookie('photoURL') as string} aria-label='icon' />}
           title={getCookie('userName') + '@' + getCookie('userId')}
         />
         <CardContent>
-          <textarea></textarea>
+          <TextareaAutosize
+            aria-label='posttext'
+            placeholder='投稿を書き込んでください'
+            minRows={3}
+            style={{ width: '100%' }}
+          />
         </CardContent>
         <CardActions disableSpacing>
           <IconButton aria-label='add image'>

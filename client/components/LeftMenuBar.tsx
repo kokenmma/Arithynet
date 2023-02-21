@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Stack from '@mui/material/Stack';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -9,6 +12,7 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import CreateIcon from '@mui/icons-material/Create';
 import Badge from '@mui/material/Badge';
+import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Fab from '@mui/material/Fab';
 import Modal from '@mui/material/Modal';
@@ -19,19 +23,21 @@ const LeftMenuBar = () => {
   let notificationCount = 1;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const theme = useTheme();
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
+  const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   return (
-    <>
+    <Stack divider={<Divider flexItem />}>
       <List>
         <ListItem disablePadding>
           <ListItemButton>
             <ListItemIcon>
               <HomeOutlinedIcon />
             </ListItemIcon>
-            <ListItemText primary='Home' />
+            {matches && <ListItemText primary='Home' />}
           </ListItemButton>
         </ListItem>
         <Divider />
@@ -42,7 +48,7 @@ const LeftMenuBar = () => {
                 <NotificationsNoneOutlinedIcon />
               </Badge>
             </ListItemIcon>
-            <ListItemText primary='Drafts' />
+            {matches && <ListItemText primary='Notification' />}
           </ListItemButton>
         </ListItem>
         <Divider />
@@ -51,13 +57,13 @@ const LeftMenuBar = () => {
             <ListItemIcon>
               <BookmarkBorderOutlinedIcon />
             </ListItemIcon>
-            <ListItemText primary='Drafts' />
+            {matches && <ListItemText primary='Bookmarks' />}
           </ListItemButton>
         </ListItem>
       </List>
-      <Fab color='primary' onClick={handleOpen} area-label='create post'>
+      <Fab variant='extended' color='primary' onClick={handleOpen} area-label='create post'>
         <CreateIcon />
-        Post
+        {matches && 'Post'}
       </Fab>
       <Modal
         open={isOpen}
@@ -67,7 +73,7 @@ const LeftMenuBar = () => {
       >
         <CreatingPost />
       </Modal>
-    </>
+    </Stack>
   );
 };
 
