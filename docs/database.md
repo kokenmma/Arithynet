@@ -1,0 +1,23 @@
+# FireStore設計
+
+- posts
+  - post_id(String)
+    - user_id(String)
+    - display_name(String)
+    - profile_image(String)
+    - content(String)
+    - images(List<String>)
+    - created_at(Timestamp)
+    - like_count(Integer)
+    - retweet_count(Integer)
+    - retweeted_by(String|Null)
+    - replay(SubCollection|Null)
+      - replay_id(String)
+        - user_id(String)
+        - display_name(String)
+        - profile_image(String)
+        - body(String)
+        - images(List<String>)
+        - like_count(Integer)
+        - retweet_count(Integer)
+        - created_at(Timestamp)
