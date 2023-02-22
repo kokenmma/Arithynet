@@ -30,7 +30,7 @@ jobs:
           directory: client
           file_name: .env
           fail_on_empty: false
-      - run: yarn install && yarn build
+      - run: yarn install
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
