@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Arithynet/latex/pkg/tikzCompile"
+	"github.com/Arithynet/latex/pkg/tikz"
 )
 
 type Data struct {
