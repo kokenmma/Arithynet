@@ -1,0 +1,1 @@
+export default function get_post() {}

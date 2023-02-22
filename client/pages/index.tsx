@@ -1,9 +1,18 @@
-import Link from 'next/link'
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
+import Container from '@mui/material/Container';
+import Timeline from '../components/Timeline';
+import LeftMenuBar from '../components/LeftMenuBar';
 
-export default function IndexPage() {
+const Index = () => {
   return (
-    <div>
-      Welcomr to UEC! <Link href="/about">About</Link>
-    </div>
-  )
-}
+    <Container>
+      <Stack direction='row' divider={<Divider orientation='vertical' flexItem />}>
+        <LeftMenuBar />
+        <Timeline />
+      </Stack>
+    </Container>
+  );
+};
+
+export default Index;

@@ -1,0 +1,1 @@
+export default function send_post() {}
