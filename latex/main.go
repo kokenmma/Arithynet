@@ -59,10 +59,10 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		if err := json.NewEncoder(w).Encode(StatusResponse{Status: "permits only POST"}); err != nil {
 			log.Println(err)
 		}
-		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
