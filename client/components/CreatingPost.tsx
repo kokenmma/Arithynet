@@ -69,10 +69,10 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
         />
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label='add image'>
+        <IconButton aria-label='add image' sx={{ display: 'none' }}>
           <AddPhotoAlternateOutlinedIcon />
         </IconButton>
-        <IconButton aria-label='add poll'>
+        <IconButton aria-label='add poll' sx={{ display: 'none' }}>
           <PollOutlinedIcon />
         </IconButton>
         <Fab

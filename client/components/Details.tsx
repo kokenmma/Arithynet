@@ -84,7 +84,7 @@ const Details = (props: DetailsProps) => {
                   onKeyDown={handleListKeyDown}
                 >
                   <MenuItem onClick={handleClose}>詳細</MenuItem>
-                  <MenuItem onClick={handleClose}>Markdown</MenuItem>
+                  <MenuItem onClick={handleClose}>ソースコード</MenuItem>
                   <MenuItem onClick={handleClose}>ブックマーク</MenuItem>
                 </MenuList>
               </ClickAwayListener>
