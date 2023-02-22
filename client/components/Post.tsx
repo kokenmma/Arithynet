@@ -1,23 +1,22 @@
-import { styled } from '@mui/material/styles';
+import React, { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import ReplyIcon from '@mui/icons-material/Reply';
 import RepeatIcon from '@mui/icons-material/Repeat';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Modal from '@mui/material/Modal';
 import Details from './Details';
+import ReplyingToPost from './ReplyingToPost';
+import { CardProps } from '@mui/material';
 
-export interface PostProps {
+export type PostProps = CardProps & {
   postId: number;
   photoURL: string;
   userName: string;
@@ -29,9 +28,25 @@ export interface PostProps {
   postTime: string;
   isFavedByU: boolean;
   isRepostedByU: boolean;
-}
+};
 
-const Post = (props: PostProps) => {
+const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
+  {
+    postId,
+    photoURL,
+    userName,
+    userId,
+    postText,
+    replyCount,
+    repostCount,
+    favCount,
+    postTime,
+    isFavedByU,
+    isRepostedByU,
+    ...cardProps
+  }: PostProps,
+  ref: React.ForwardedRef<HTMLDivElement>
+) {
   // render() の実装は以下の通りにする
 
   // services/get-post.ts を使って，postId から photoURL，username，postText などを読みだす．
@@ -46,34 +61,63 @@ const Post = (props: PostProps) => {
   // let postHTML: JSX.Element = useMemo(() => render(postText), [postText])
   let postHTML: JSX.Element = <span>Welcome to UEC!</span>;
 
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const theme = useTheme();
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
   return (
-    <Card sx={{ width: 550 }}>
+    <Card sx={{ width: 600 }} ref={ref} {...cardProps}>
       <CardHeader
-        avatar={<Avatar src={props.photoURL} aria-label='icon' />}
-        action={<Details postId={props.postId} />}
-        title={props.userName + '@' + props.userId}
-        subheader={props.postTime}
+        avatar={<Avatar src={photoURL} aria-label='icon' />}
+        action={<Details postId={postId} />}
+        title={userName + '@' + userId}
+        subheader={postTime}
       />
       <CardContent>{postHTML}</CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label='reply'>
-          <ReplyIcon />
-        </IconButton>
-        <Typography variant='body2'>{props.replyCount}</Typography>
+        <ReplyIcon onClick={handleOpen} />
+        <Modal
+          open={isOpen}
+          onClose={handleClose}
+          aria-labelledby='modal-modal-title'
+          aria-describedby='modal-modal-description'
+          sx={{ '& .MuiPaper-root-MuiCard-root': { padding: 0 } }}
+        >
+          <ReplyingToPost
+            postId={postId}
+            photoURL={photoURL}
+            userName={userName}
+            userId={userId}
+            postText={postText}
+            replyCount={replyCount}
+            repostCount={repostCount}
+            favCount={favCount}
+            postTime={postTime}
+            isFavedByU={isFavedByU}
+            isRepostedByU={isRepostedByU}
+            postHTML={postHTML}
+            handleClose={handleClose}
+          />
+        </Modal>
+        <Typography variant='body2'>{replyCount}</Typography>
         <IconButton aria-label='repost'>
+          {/* Repost の処理の呼び出しを行う */}
           <RepeatIcon />
         </IconButton>
-        <Typography variant='body2'>{props.repostCount}</Typography>
+        <Typography variant='body2'>{repostCount}</Typography>
         <IconButton aria-label='favorite'>
+          {/* Favorite の処理の呼び出しを行う */}
           <FavoriteIcon />
         </IconButton>
-        <Typography variant='body2'>{props.favCount}</Typography>
+        <Typography variant='body2'>{favCount}</Typography>
         <IconButton aria-label='share'>
           <ShareIcon />
         </IconButton>
       </CardActions>
     </Card>
   );
-};
+});
 
 export default Post;

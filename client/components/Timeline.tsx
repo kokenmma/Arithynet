@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Post, { PostProps } from './Post';
@@ -26,7 +28,7 @@ const Timeline = () => {
       postText: 'Welcome to UEC!',
       replyCount: 1,
       repostCount: 2,
-      favCount: 3,
+      favCount: 5,
       postTime: 'February 21, 2023',
       isFavedByU: true,
       isRepostedByU: true,
@@ -34,6 +36,9 @@ const Timeline = () => {
   ];
   const [posts, setPosts] = useState<PostProps[]>(testPosts);
   // 無限スクロールを実装する
+
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   return (
     <Stack divider={<Divider />}>
