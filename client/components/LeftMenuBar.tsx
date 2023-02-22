@@ -11,6 +11,7 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import CreateIcon from '@mui/icons-material/Create';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -19,7 +20,7 @@ import Modal from '@mui/material/Modal';
 import CreatingPost from './CreatingPost';
 
 export const LeftMenuBarWidthWhenGreaterThanMd = 240;
-export const LeftMenuBarWidthWhenLessThanMd = 50;
+export const LeftMenuBarWidthWhenLessThanMd = 70;
 
 const LeftMenuBar = () => {
   // DB から通知数を取得
@@ -67,10 +68,30 @@ const LeftMenuBar = () => {
               {matches && <ListItemText primary='Bookmarks' />}
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <SettingsOutlinedIcon />
+              </ListItemIcon>
+              {matches && <ListItemText primary='Settings' />}
+            </ListItemButton>
+          </ListItem>
         </List>
-        <Fab variant='extended' color='primary' onClick={handleOpen} area-label='create post'>
+        <Fab
+          variant='extended'
+          color='primary'
+          onClick={handleOpen}
+          area-label='create post'
+          sx={{
+            width: matches
+              ? 0.7 * LeftMenuBarWidthWhenGreaterThanMd
+              : LeftMenuBarWidthWhenLessThanMd,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        >
           <CreateIcon />
-          {matches && 'Post'}
+          {matches && '投稿'}
         </Fab>
         <Modal
           open={isOpen}
@@ -78,7 +99,7 @@ const LeftMenuBar = () => {
           aria-labelledby='modal-modal-title'
           aria-describedby='modal-modal-description'
         >
-          <CreatingPost />
+          <CreatingPost handleClose={handleClose} />
         </Modal>
       </Stack>
     </Box>
