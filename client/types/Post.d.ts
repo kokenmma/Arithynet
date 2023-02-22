@@ -11,6 +11,6 @@ export interface Post {
   reposted_by: string | null;
 }
 
-export interface PostInput extends Omit<Post, 'created_at' | 'like_count' | 'repost_count' | 'reply_count' | 'reposted_by' | 'reply'> {
+export interface PostInput extends Omit<Post, 'created_at' | 'like_count' | 'repost_count' | 'reply_count' | 'reposted_by'> {
 
 }
