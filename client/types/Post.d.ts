@@ -7,10 +7,10 @@ export interface Post {
   created_at: Date;
   like_count: number;
   repost_count: number;
-  replay_count: number;
+  reply_count: number;
   reposted_by: string | null;
 }
 
-export interface PostInput extends Omit<Post, 'created_at' | 'like_count' | 'repost_count' | 'replay_count' | 'reposted_by' | 'replay'> {
+export interface PostInput extends Omit<Post, 'created_at' | 'like_count' | 'repost_count' | 'reply_count' | 'reposted_by' | 'reply'> {
 
 }

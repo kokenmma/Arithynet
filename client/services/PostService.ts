@@ -21,7 +21,7 @@ export const addPost = async (post: PostInput, reposted_by: string | null = null
     created_at: new Date(),
     like_count: 0,
     repost_count: 0,
-    replay_count: 0,
+    reply_count: 0,
     reposted_by: reposted_by
   }
   const docRef = await addDoc(collection(db, "posts"), newRecord);
@@ -37,11 +37,11 @@ export const upLikeCount = async (post_id: string): Promise<void> => {
   });
 }
 
-export const upReplayCount = async (post_id: string): Promise<void> => {
+export const upreplyCount = async (post_id: string): Promise<void> => {
   // Update like count
   const docRef = doc(db, "posts", post_id);
   await updateDoc(docRef, {
-    replay_count: increment(1)
+    reply_count: increment(1)
   });
 }
 
@@ -76,7 +76,7 @@ export const rePost = async (post_id: string, user_id: string): Promise<void> =>
 
 export const getRepaly = async (post_id: string): Promise<Post[]> => {
   // Get Posts from firebase for timeline
-  const querySnapshot = await getDocs(collection(db, 'posts', post_id, 'replays'));
+  const querySnapshot = await getDocs(collection(db, 'posts', post_id, 'replys'));
   const posts: Post[] = [];
   querySnapshot.forEach((doc) => {
     posts.push(doc.data() as Post);
@@ -84,18 +84,18 @@ export const getRepaly = async (post_id: string): Promise<Post[]> => {
   return posts;
 }
 
-export const replayToPost = async (post_id: string, replay: PostInput): Promise<string> => {
-  // Update replay count
-  await upReplayCount(post_id);
-  // Update replay
+export const replyToPost = async (post_id: string, reply: PostInput): Promise<string> => {
+  // Update reply count
+  await upreplyCount(post_id);
+  // Update reply
   const docRef = await addDoc(
-    collection(db, 'posts', post_id, 'replays'),
+    collection(db, 'posts', post_id, 'replys'),
     {
-      ...replay,
+      ...reply,
       created_at: new Date(),
       like_count: 0,
       repost_count: 0,
-      replay_count: 0,
+      reply_count: 0,
       reposted_by: null
     });
   console.log("Document written with ID: ", docRef.id);
