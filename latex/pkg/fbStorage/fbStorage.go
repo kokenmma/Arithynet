@@ -1,10 +1,10 @@
 package fbstorage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	firebase "firebase.google.com/go"
 
@@ -12,40 +12,32 @@ import (
 	"google.golang.org/api/option"
 )
 
-func initFb() (*firebase.App, error) {
+func InitFb(stgBucket, crdFile string) (*storage.BucketHandle, error) {
     config := &firebase.Config{
-        StorageBucket: "test-sns-eb77d.appspot.com",
+        StorageBucket: stgBucket,//"test-sns-eb77d.appspot.com",
     }
-    opt := option.WithCredentialsFile("test-sns-key.json")
+    opt := option.WithCredentialsFile(crdFile)//("test-sns-key.json")
     app, err := firebase.NewApp(context.Background(), config, opt)
     if err != nil {
-      return nil, fmt.Errorf("error initializing app: %v", err)
-    }
-    return app, err
-}
-
-func svgSave(filename string, svg io.Reader) {
-    app, err := initFb()
-    if err != nil {
-        log.Println()
-        return
+        return nil, fmt.Errorf("error initializing app: %v", err)
     }
 
     client, err := app.Storage(context.Background())
     if err != nil {
-        log.Println(err)
+        return nil, fmt.Errorf("error get client: %v", err)
     }
 
     bucket, err := client.DefaultBucket()
     if err != nil {
-        log.Println(err)
+        return nil, fmt.Errorf("error get bucket: %v", err)
     }
+    return bucket, err
+}
 
-    ctx := context.Background()
-
-    writer := bucket.Object(filename).NewWriter(ctx)
-    writer.ObjectAttrs.ContentType = "text/plain"
-    writer.ObjectAttrs.CacheControl = "no-cache"
+func SvgSave(bucket *storage.BucketHandle, filename, svg string) error {
+    writer := bucket.Object(filename).NewWriter(context.Background())
+    //writer.ObjectAttrs.ContentType = "text/plain"
+    //writer.ObjectAttrs.CacheControl = "no-cache"
     writer.ObjectAttrs.ACL = []storage.ACLRule{
         {
             Entity: storage.AllUsers,
@@ -53,12 +45,14 @@ func svgSave(filename string, svg io.Reader) {
         },
     }
 
-    if _, err = io.Copy(writer, svg); err != nil {
-        log.Fatalln(err)
+    buf := bytes.NewBuffer([]byte(svg))
+
+    if _, err := io.Copy(writer, buf); err != nil {
+        return fmt.Errorf("error save svg: %v", err)
     }
-    defer func() {
-        if err := writer.Close(); err != nil {
-            log.Println(err)
-        }
-    }()
+    if err := writer.Close(); err != nil {
+        return fmt.Errorf("error writer close: %v", err)
+    }
+
+    return nil
 }

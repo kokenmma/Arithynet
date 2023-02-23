@@ -1,22 +1,38 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 	"time"
 
-    "github.com/rs/cors"
+	"cloud.google.com/go/storage"
+	"github.com/Arithynet/latex/pkg/fbStorage"
 	"github.com/Arithynet/latex/pkg/tikz"
+	"github.com/rs/cors"
 )
 
-type Data struct {
-	Code string `json:"code"`
+type Handler struct{
+    bucket *storage.BucketHandle
+    storageBucketUrl string
 }
 
-func NewData(txt string) *Data {
-	return &Data{Code: txt}
+func NewHandler(backet *storage.BucketHandle, storageBucketUrl string) *Handler{
+	return &Handler{
+        bucket: backet,
+        storageBucketUrl: storageBucketUrl,
+    }
+}
+
+type Data struct {
+	Location string `json:"location"`
+}
+
+func NewData(location string) *Data {
+	return &Data{Location: location}
 }
 
 type StatusResponse struct {
@@ -24,7 +40,12 @@ type StatusResponse struct {
 	InternalError error  `json:"internalerror,omitempty"`
 }
 
-func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func getHashFilename(svg string) string {
+    b := sha256.Sum256([]byte(svg))
+    return hex.EncodeToString(b[:]) + ".svg"
+}
+
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	switch r.Method {
 	case http.MethodPost:
@@ -38,9 +59,9 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		code := tikz.NewTikz(string(body))
-		svg, err := code.MakeDir().Compile().Pdf2svg().SvgString()
+		code := tikz.NewTikz(string(body)).MakeDir()
 		defer code.RmoveDir()
+		svg, err := code.Compile().Pdf2svg().SvgString()
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -50,8 +71,19 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+        filename := getHashFilename(svg)
+        err = fbstorage.SvgSave(h.bucket, filename, svg)
+        if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			if err := json.NewEncoder(w).Encode(&StatusResponse{Status: "err", InternalError: err}); err != nil {
+				log.Println(err)
+			}
+			return
+        }
+
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(NewData(svg)); err != nil {
+        if err := json.NewEncoder(w).Encode(NewData("gs://" + h.storageBucketUrl + "/" + filename)); err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			if err := json.NewEncoder(w).Encode(StatusResponse{Status: "err", InternalError: err}); err != nil {
@@ -68,8 +100,15 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+    storageBucketUrl := "test-sns-eb77d.appspot.com"
+    credentialsFilepath := "./pkg/fbStorage/test-sns-key.json"
+    bucket, err := fbstorage.InitFb(storageBucketUrl, credentialsFilepath)
+    if err != nil {
+        log.Fatalln(err)
+    }
+
 	mux := http.NewServeMux()
-	mux.Handle("/", NewData(""))
+	mux.Handle("/", NewHandler(bucket, storageBucketUrl))
 
     handler := cors.Default().Handler(mux)
 	srv := &http.Server{
