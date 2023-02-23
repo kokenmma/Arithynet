@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 /** @ts-ignore **/
 import ReactHtmlParser from 'react-html-parser';
@@ -20,35 +20,23 @@ import Stack from '@mui/material/Stack';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
 import { CardProps } from '@mui/material';
-import renderPost from '../services/renderPost';
+import type { Post as PostType, PostInput } from '../types/Post';
+import RenderContent from './RenderContent';
 
-export type PostProps = CardProps & {
-  postId: number;
-  photoURL: string;
-  userName: string;
-  userId: string;
-  postText: string;
-  replyCount: number;
-  repostCount: number;
-  favCount: number;
-  postTime: string;
-  isFavedByU: boolean;
-  isRepostedByU: boolean;
-};
+export type PostProps = CardProps & PostType;
 
 const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   {
-    postId,
-    photoURL,
-    userName,
-    userId,
-    postText,
-    replyCount,
-    repostCount,
-    favCount,
-    postTime,
-    isFavedByU,
-    isRepostedByU,
+    user_id,
+    display_name,
+    profile_image,
+    content,
+    images,
+    created_at,
+    like_count,
+    repost_count,
+    reply_count,
+    reposted_by,
     ...cardProps
   }: PostProps,
   ref: React.ForwardedRef<HTMLDivElement>
@@ -65,7 +53,6 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   // timestamp が返ってくるので，それから投稿日時の文字列 postTime を作る
 
   // let postHTML: JSX.Element = useMemo(() => render(postText), [postText])
-  let postHTML: JSX.Element = <>{ReactHtmlParser(renderPost(postText))}</>;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [raw, setRaw] = useState<boolean>(false);
@@ -80,19 +67,24 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
       <IconButton onClick={changeRaw}>
         {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
       </IconButton>
-      <Details postId={postId} />
+      {/* <Details postId={postId} /> */}
     </Stack>
+  );
+
+  const RenderedContent: JSX.Element = useMemo(
+    () => <RenderContent content={content} images={images} />,
+    [content, images]
   );
 
   return (
     <Card sx={{ width: 600 }} ref={ref} {...cardProps}>
       <CardHeader
-        avatar={<Avatar src={photoURL} aria-label='icon' />}
+        avatar={<Avatar src={profile_image} aria-label='icon' />}
         action={<Action />}
-        title={userName + '@' + userId}
-        subheader={postTime}
+        title={display_name + '@' + user_id}
+        subheader={created_at.toDateString()}
       />
-      <CardContent>{!raw ? postHTML : <Typography>{postText}</Typography>}</CardContent>
+      <CardContent>{!raw ? RenderedContent : <Typography>{content}</Typography>}</CardContent>
       <CardActions disableSpacing>
         <ReplyIcon onClick={handleOpen} />
         <Modal
@@ -103,32 +95,31 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
           sx={{ '& .MuiPaper-root-MuiCard-root': { padding: 0 } }}
         >
           <ReplyingToPost
-            postId={postId}
-            photoURL={photoURL}
-            userName={userName}
-            userId={userId}
-            postText={postText}
-            replyCount={replyCount}
-            repostCount={repostCount}
-            favCount={favCount}
-            postTime={postTime}
-            isFavedByU={isFavedByU}
-            isRepostedByU={isRepostedByU}
-            postHTML={postHTML}
+            user_id={user_id}
+            display_name={display_name}
+            profile_image={profile_image}
+            content={content}
+            images={images}
+            created_at={created_at}
+            like_count={like_count}
+            repost_count={repost_count}
+            reply_count={reply_count}
+            reposted_by={reposted_by}
+            RenderedContent={RenderedContent}
             handleClose={handleClose}
           />
         </Modal>
-        <Typography variant='body2'>{replyCount}</Typography>
+        <Typography variant='body2'>{reply_count}</Typography>
         <IconButton aria-label='repost'>
           {/* Repost の処理の呼び出しを行う */}
           <RepeatIcon />
         </IconButton>
-        <Typography variant='body2'>{repostCount}</Typography>
+        <Typography variant='body2'>{repost_count}</Typography>
         <IconButton aria-label='favorite'>
           {/* Favorite の処理の呼び出しを行う */}
           <FavoriteIcon />
         </IconButton>
-        <Typography variant='body2'>{favCount}</Typography>
+        <Typography variant='body2'>{like_count}</Typography>
         <IconButton aria-label='share'>
           <ShareIcon />
         </IconButton>

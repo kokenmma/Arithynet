@@ -8,10 +8,12 @@
     "format": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json}'"
   },
   "dependencies": {
+    "@emotion/babel-plugin": "^11.10.6",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/icons-material": "^5.11.9",
     "@mui/material": "^5.11.9",
+    "@types/firebase": "^3.2.1",
     "cookies-next": "^2.1.1",
     "katex": "^0.16.4",
     "markdown-it": "^13.0.1",

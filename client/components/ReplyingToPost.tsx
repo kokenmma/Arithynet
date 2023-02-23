@@ -19,7 +19,7 @@ import TextareaAutosize from '@mui/base/TextareaAutosize';
 import Details from './Details';
 import { PostProps } from './Post';
 
-type ReplyingToPostProps = PostProps & { postHTML: JSX.Element; handleClose: () => void };
+type ReplyingToPostProps = PostProps & { RenderedContent: JSX.Element; handleClose: () => void };
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -38,18 +38,17 @@ const style = {
 const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
   function ReplyingToPostImpl(
     {
-      postId,
-      photoURL,
-      userName,
-      userId,
-      postText,
-      replyCount,
-      repostCount,
-      favCount,
-      postTime,
-      isFavedByU,
-      isRepostedByU,
-      postHTML,
+      user_id,
+      display_name,
+      profile_image,
+      content,
+      images,
+      created_at,
+      like_count,
+      repost_count,
+      reply_count,
+      reposted_by,
+      RenderedContent,
       handleClose,
       ...cardProps
     }: ReplyingToPostProps,
@@ -67,7 +66,7 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
         <IconButton onClick={changeRaw}>
           {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
         </IconButton>
-        <Details postId={postId} />
+        {/* <Details postId={postId} /> */}
       </Stack>
     );
 
@@ -75,11 +74,11 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
     return (
       <Card sx={style} ref={ref} {...cardProps}>
         <CardHeader
-          avatar={<Avatar src={photoURL as string} aria-label='icon' />}
+          avatar={<Avatar src={profile_image as string} aria-label='icon' />}
           action={<Action />}
-          title={userName + '@' + userId}
+          title={display_name + '@' + user_id}
         />
-        <CardContent>{!raw ? postHTML : <Typography>{postText}</Typography>}</CardContent>
+        <CardContent>{!raw ? RenderedContent : <Typography>{content}</Typography>}</CardContent>
         <CardHeader
           avatar={<Avatar src={getCookie('photoURL') as string} aria-label='icon' />}
           title={getCookie('userName') + '@' + getCookie('userId')}

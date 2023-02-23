@@ -9,5 +9,5 @@ services:
       - .:/var/www/html
     ports:
       - 3000:3000
-    command: sh -c "yarn dev"
+    #command: sh -c "yarn dev"
     tty: true
