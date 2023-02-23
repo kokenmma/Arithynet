@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
+/** @ts-ignore **/
+import ReactHtmlParser from 'react-html-parser';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
@@ -18,6 +20,7 @@ import Stack from '@mui/material/Stack';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
 import { CardProps } from '@mui/material';
+import renderPost from '../services/renderPost';
 
 export type PostProps = CardProps & {
   postId: number;
@@ -62,7 +65,7 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   // timestamp が返ってくるので，それから投稿日時の文字列 postTime を作る
 
   // let postHTML: JSX.Element = useMemo(() => render(postText), [postText])
-  let postHTML: JSX.Element = <span>Welcome to UEC!(html)</span>;
+  let postHTML: JSX.Element = <>{ReactHtmlParser(renderPost(postText))}</>;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [raw, setRaw] = useState<boolean>(false);
