@@ -13,6 +13,7 @@
     "@mui/icons-material": "^5.11.9",
     "@mui/material": "^5.11.9",
     "cookies-next": "^2.1.1",
+    "firebase": "^9.17.1",
     "next": "12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
