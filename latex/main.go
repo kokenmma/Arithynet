@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+    "github.com/rs/cors"
 	"github.com/Arithynet/latex/pkg/tikz"
 )
 
@@ -69,9 +70,11 @@ func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/", NewData(""))
+
+    handler := cors.Default().Handler(mux)
 	srv := &http.Server{
 		Addr:              ":8080",
-		Handler:           mux,
+		Handler:           handler,
 		ReadHeaderTimeout: 3 * time.Second,
 		ReadTimeout:       5 * time.Second,
 		WriteTimeout:      5 * time.Second,

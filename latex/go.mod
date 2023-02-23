@@ -3,7 +3,9 @@ module github.com/Arithynet/latex
 go 1.20
 
 require (
+	cloud.google.com/go/storage v1.27.0
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/rs/cors v1.8.3
 	google.golang.org/api v0.110.0
 )
 
@@ -14,7 +16,6 @@ require (
 	cloud.google.com/go/firestore v1.9.0 // indirect
 	cloud.google.com/go/iam v0.8.0 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
-	cloud.google.com/go/storage v1.27.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
