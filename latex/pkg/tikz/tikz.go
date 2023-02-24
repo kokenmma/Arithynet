@@ -34,11 +34,14 @@ func NewTikz(index string) *Tikz {
 \usepackage{pgf}
 \usepackage{tikz}
 \usetikzlibrary{arrows,automata}
+\pgfrealjobname{filename}
 
 \begin{document}
+\beginpgfgraphicnamed{texput}
 `,
 		index: index,
 		postamble: `
+\endpgfgraphicnamed
 \end{document}`,
 	}
 }
