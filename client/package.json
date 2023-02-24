@@ -16,7 +16,8 @@
     "firebase": "^9.17.1",
     "next": "12",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "recoil": "^0.7.6"
   },
   "devDependencies": {
     "@emotion/babel-plugin": "^11.10.6",
