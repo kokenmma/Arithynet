@@ -43,7 +43,7 @@ export const addPost = async (post: PostInput): Promise<string> => {
   const newRecord: PostDB = {
     ...post,
     created_at: new Date().toDateString(),
-    like_count: 0,
+    like_count: [],
     repost_count: 0,
     reply_count: 0,
     reposted_by: [],
@@ -56,11 +56,33 @@ export const addPost = async (post: PostInput): Promise<string> => {
   return docRef.id;
 };
 
-export const upLikeCount = async (post_id: string): Promise<void> => {
+const getWhoLiked = async (post_id: string): Promise<string[]> => {
+  // Get Post from firebase
+  const docRef = doc(db, 'posts', post_id) as DocumentReference<PostDB>;
+  const docSnap: DocumentSnapshot<PostDB> = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const { like_count }: PostDB = docSnap.data();
+    return like_count;
+  } else {
+    throw new Error('No such document!');
+  }
+};
+
+export const upLikeCount = async (post_id: string, user: string): Promise<void> => {
   // Update like count
   const docRef: DocumentReference<DocumentData> = doc(db, 'posts', post_id);
+  const current = await getWhoLiked(post_id);
   await updateDoc(docRef, {
-    like_count: increment(1),
+    like_count: current.includes(user) ? current : [...current, user],
+  });
+};
+
+export const removeLikeCount = async (post_id: string, user: string): Promise<void> => {
+  // Remove like count
+  const docRef: DocumentReference<DocumentData> = doc(db, 'posts', post_id);
+  const current = await getWhoLiked(post_id);
+  await updateDoc(docRef, {
+    like_count: current.filter((item) => item !== user),
   });
 };
 
@@ -123,7 +145,7 @@ export const replyToPost = async (post_id: string, reply_input: PostInput): Prom
   const reply: WithFieldValue<PostDB> = {
     ...reply_input,
     created_at: new Date().toDateString(),
-    like_count: 0,
+    like_count: [],
     repost_count: 0,
     reply_count: 0,
     reposted_by: [],

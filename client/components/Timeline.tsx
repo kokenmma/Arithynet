@@ -18,7 +18,7 @@ const Timeline = () => {
       content: `Equation: $$\\rho \\frac{D \\bm{u}}{Dt} = -\\nabla p + (\\lambda + \\mu ) \\nabla (\\nabla \\cdot \\bm{u}) + \\mu \\nabla ^{2} \\bm{u} +\\rho \\tilde{\\bm{F}}$$`,
       images: [],
       created_at: new Date(),
-      like_count: 1,
+      like_count: [],
       repost_count: 2,
       reply_count: 3,
       reposted_by: ['testuser'],
@@ -31,7 +31,7 @@ const Timeline = () => {
       content: `\n$$\nL = \\frac{1}{2} \\rho v^2 S C_L\n$$`,
       images: [],
       created_at: new Date(),
-      like_count: 1,
+      like_count: [],
       repost_count: 2,
       reply_count: 3,
       reposted_by: ['testuser'],
@@ -44,13 +44,13 @@ const Timeline = () => {
       content: '\n  # Hello World\n  $$\n  L = \\frac{1}{2} \\rho v^2 S C_L\n  $$\n  ',
       images: [],
       created_at: new Date(),
-      like_count: 1,
+      like_count: [],
       repost_count: 2,
       reply_count: 3,
       reposted_by: ['testuser'],
     },
   ];
-  const [posts, setPosts] = useState<PostWithId[]>(testPosts);
+  const [posts, setPosts] = useState<PostWithId[]>([]);
 
   useEffect(() => {
     onSnapshot(collection(db, 'posts'), (querySnapshot) => {

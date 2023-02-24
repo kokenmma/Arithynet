@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
@@ -21,7 +21,8 @@ import ReplyingToPost from './ReplyingToPost';
 import { CardProps } from '@mui/material';
 import type { PostWithId } from '../types/Post';
 import RenderContent from './RenderContent';
-import { upLikeCount, upreplyCount } from '../services/PostService';
+import { removeLikeCount, upLikeCount, upreplyCount } from '../services/PostService';
+import { useUser } from '../lib/auth';
 
 export type PostProps = CardProps & PostWithId;
 
@@ -42,6 +43,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
   }: PostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
+  const user = useUser();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [raw, setRaw] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
@@ -52,9 +54,20 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
   const handleClose = () => setIsOpen(false);
   const changeRaw = () => setRaw((raw) => !raw);
 
-  const handleRepost = async () => setIsReposted((isReposted) => !isReposted);
-  const handleLike = async () => setIsLiked((isLiked) => !isLiked);
-
+  const handleRepost = async () => {setIsReposted((isReposted) => !isReposted)}
+  ;
+  const handleLike = async () => {
+    if(!user?.uid) return;
+    if(isLiked){
+      // いいねを取り消す
+      await removeLikeCount(post_id, user.uid);
+    }else{
+      // いいねをする
+      await upLikeCount(post_id, user.uid);
+    }
+    setIsLiked((isLiked) => !isLiked);
+  }
+  
   const Action = () => (
     <Stack direction='row'>
       <IconButton onClick={changeRaw}>
@@ -109,11 +122,11 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
           <RepeatIcon sx={isReposted ? { color: 'green' } : {}} />
         </IconButton>
         <Typography variant='body2'>{repost_count}</Typography>
-        <IconButton aria-label='favorite'>
+        <IconButton aria-label='favorite' onClick={handleLike}>
           {/* Favorite の処理の呼び出しを行う */}
           <FavoriteIcon sx={isLiked ? { color: 'green' } : {}} />
         </IconButton>
-        <Typography variant='body2'>{like_count}</Typography>
+        <Typography variant='body2'>{like_count.length}</Typography>
         <IconButton aria-label='share'>
           <ShareIcon />
         </IconButton>
