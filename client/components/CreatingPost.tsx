@@ -53,14 +53,12 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   });
   const content_ref = useRef<HTMLTextAreaElement | null>(null);
   const sendPost = async () => {
-    if (content_ref) {
+    if (content_ref.current !== null) {
       const got_images = await getImages(postInput.content);
-      setPostInput(({ content, images, ...rest }: PostInput) => ({
-        content: content_ref.current?.value ?? content,
-        images: got_images,
-        ...rest,
-      }));
-      await addPost(postInput);
+      const postData : PostInput = postInput;
+      postData.content = content_ref.current.value;
+      postData.images = got_images;
+      await addPost(postData);
     }
     handleClose();
   };
@@ -73,7 +71,7 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
         user_id: user.uid,
         display_name: user.displayName ?? '',
         profile_image: user.photoURL ?? '',
-        content: '',
+        content: postInput.content,
         images: [],
       });
     } else {
