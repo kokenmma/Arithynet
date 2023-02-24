@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { NextPage } from 'next';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -18,13 +19,15 @@ import Stack from '@mui/material/Stack';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
 import { CardProps } from '@mui/material';
-import type { Post as PostType } from '../types/Post';
+import type { PostWithId } from '../types/Post';
 import RenderContent from './RenderContent';
+import { upLikeCount, upreplyCount } from '../services/PostService';
 
-export type PostProps = CardProps & PostType;
+export type PostProps = CardProps & PostWithId;
 
-const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
+const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   {
+    post_id,
     user_id,
     display_name,
     profile_image,
@@ -41,13 +44,16 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
 ) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [raw, setRaw] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isReposted, setIsReposted] = useState<boolean>(false);
   const theme = useTheme();
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
   const changeRaw = () => setRaw((raw) => !raw);
 
-  const handleRepost = async () => {};
+  const handleRepost = async () => setIsReposted((isReposted) => !isReposted);
+  const handleLike = async () => setIsLiked((isLiked) => !isLiked);
 
   const Action = () => (
     <Stack direction='row'>
@@ -82,6 +88,7 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
           sx={{ '& .MuiPaper-root-MuiCard-root': { padding: 0 } }}
         >
           <ReplyingToPost
+            post_id={post_id}
             user_id={user_id}
             display_name={display_name}
             profile_image={profile_image}
@@ -99,12 +106,12 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
         <Typography variant='body2'>{reply_count}</Typography>
         <IconButton aria-label='repost'>
           {/* Repost の処理の呼び出しを行う */}
-          <RepeatIcon />
+          <RepeatIcon sx={isReposted ? { color: 'green' } : {}} />
         </IconButton>
         <Typography variant='body2'>{repost_count}</Typography>
         <IconButton aria-label='favorite'>
           {/* Favorite の処理の呼び出しを行う */}
-          <FavoriteIcon />
+          <FavoriteIcon sx={isLiked ? { color: 'green' } : {}} />
         </IconButton>
         <Typography variant='body2'>{like_count}</Typography>
         <IconButton aria-label='share'>

@@ -4,12 +4,13 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Post from './Post';
-import { Post as PostType } from '../types/Post';
+import { PostWithId } from '../types/Post';
 import { getPosts } from '../services/PostService';
 
 const Timeline = () => {
   const testPosts = [
     {
+      post_id: '123456',
       user_id: '123456abc',
       display_name: 'testuser',
       profile_image: '',
@@ -21,9 +22,10 @@ const Timeline = () => {
       like_count: 1,
       repost_count: 2,
       reply_count: 3,
-      reposted_by: 'testuser',
+      reposted_by: ['testuser'],
     },
     {
+      post_id: '123457',
       user_id: '123456abc',
       display_name: 'testuser',
       profile_image: '',
@@ -41,15 +43,16 @@ const Timeline = () => {
       like_count: 1,
       repost_count: 2,
       reply_count: 3,
-      reposted_by: 'testuser',
+      reposted_by: ['testuser'],
     },
   ];
-  const [posts, setPosts] = useState<PostType[]>(testPosts);
+  const [posts, setPosts] = useState<PostWithId[]>(testPosts);
   useEffect(() => {
     (async () => setPosts(await getPosts()))();
   }, []);
 
   const theme = useTheme();
+  // レスポンシブデザインのために matches を定義している
   const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   return (
