@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
@@ -16,6 +17,7 @@ import { CardProps } from '@mui/material';
 import { PostInput } from '../types/Post';
 import { getImages } from '../services/latexserver';
 import { addPost } from '../services/PostService';
+import { useUser } from '../lib/auth';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -40,6 +42,8 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   { handleClose, ...cardProps }: CreatingPostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
+  const user = useUser();
+  const router = useRouter();
   const [postInput, setPostInput] = useState<PostInput>({
     user_id: '',
     display_name: '',
@@ -52,7 +56,7 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
     if (content_ref) {
       const got_images = await getImages(postInput.content);
       setPostInput(({ content, images, ...rest }: PostInput) => ({
-        content: content,
+        content: content_ref.current?.value ?? content,
         images: got_images,
         ...rest,
       }));
@@ -64,21 +68,18 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   const theme = useTheme();
 
   useEffect(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setPostInput({
-          user_id: user.uid,
-          display_name: user.displayName ?? '',
-          profile_image: user.photoURL ?? '',
-          content: '',
-          images: [],
-        });
-      } else {
-        // サインイン画面にリダイレクト
-      }
-    });
-  }, []);
+    if (user) {
+      setPostInput({
+        user_id: user.uid,
+        display_name: user.displayName ?? '',
+        profile_image: user.photoURL ?? '',
+        content: '',
+        images: [],
+      });
+    } else {
+      router.push('/login');
+    }
+  }, [user, router]);
 
   return (
     <Card sx={style} ref={ref} {...cardProps}>

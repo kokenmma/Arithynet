@@ -6,6 +6,7 @@ import { useAuth, useUser } from '../lib/auth';
 import { useEffect } from 'react';
 import { router } from 'next/client';
 import { useRouter } from 'next/router';
+import { promises } from 'dns';
 
 const darkTheme = createTheme({
   palette: {
