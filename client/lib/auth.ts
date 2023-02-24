@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+/** @ts-ignore **/
 import { atom, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   getAuth,

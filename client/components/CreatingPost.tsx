@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { NextPage } from 'next';
+import { getAuth, onAuthStateChanged, updateCurrentUser } from 'firebase/auth';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -10,14 +11,18 @@ import Fab from '@mui/material/Fab';
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import PublishIcon from '@mui/icons-material/Publish';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { CardProps } from '@mui/material';
 import { PostInput } from '../types/Post';
 import { getImages } from '../services/latexserver';
 import { addPost } from '../services/PostService';
 import { useUser } from '../lib/auth';
+import RenderContent from './RenderContent';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -38,10 +43,15 @@ const style = {
 
 type CreatingPostProps = CardProps & { handleClose: () => void };
 
-const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(function CreatingPostImpl(
+const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
+  HTMLDivElement,
+  CreatingPostProps
+>(function CreatingPostImpl(
   { handleClose, ...cardProps }: CreatingPostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
+  const [raw, setRaw] = useState<boolean>(false);
+  const changeRaw = () => setRaw((raw) => !raw);
   const user = useUser();
   const router = useRouter();
   const [postInput, setPostInput] = useState<PostInput>({
@@ -55,7 +65,7 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   const sendPost = async () => {
     if (content_ref.current !== null) {
       const got_images = await getImages(postInput.content);
-      const postData : PostInput = postInput;
+      const postData: PostInput = postInput;
       postData.content = content_ref.current.value;
       postData.images = got_images;
       await addPost(postData);
@@ -77,31 +87,56 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
     } else {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [user, router, postInput]);
+
+  const [preview, setPreview] = useState<JSX.Element>(<></>);
+
+  useEffect(() => {
+    (async () => {
+      if (content_ref.current !== null) {
+        const got_images = await getImages(content_ref.current.value);
+        setPreview(<RenderContent content={content_ref.current.value} images={got_images} />);
+      }
+    })();
+  }, [content_ref]);
+
+  const Action = () => (
+    <Stack direction='row'>
+      <IconButton onClick={changeRaw}>
+        {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+      </IconButton>
+      {/* <Details postId={postId} /> */}
+    </Stack>
+  );
 
   return (
     <Card sx={style} ref={ref} {...cardProps}>
       <CardHeader
         avatar={<Avatar src={postInput.profile_image} aria-label='icon' />}
         title={postInput.display_name + '@' + postInput.user_id}
+        action={<Action />}
       />
       <CardContent>
-        <TextareaAutosize
-          aria-label='posttext'
-          placeholder='投稿を書き込んでください'
-          minRows={3}
-          style={{
-            width: '100%',
-            boxSizing: 'border-box',
-            border: 'none',
-            resize: 'none',
-            outline: 'none',
-            backgroundColor: 'inherit',
-            color: theme.palette.text.primary,
-            fontSize: 18,
-          }}
-          ref={content_ref}
-        />
+        {!raw ? (
+          <TextareaAutosize
+            aria-label='posttext'
+            placeholder='投稿を書き込んでください'
+            minRows={3}
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              border: 'none',
+              resize: 'none',
+              outline: 'none',
+              backgroundColor: 'inherit',
+              color: theme.palette.text.primary,
+              fontSize: 18,
+            }}
+            ref={content_ref}
+          />
+        ) : (
+          preview
+        )}
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label='add image' sx={{ display: 'none' }}>

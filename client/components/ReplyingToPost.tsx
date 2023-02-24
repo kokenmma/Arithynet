@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { getCookie } from 'cookies-next';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -18,6 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import Details from './Details';
 import { PostProps } from './Post';
+import { useUser } from '../lib/auth';
 
 type ReplyingToPostProps = PostProps & { RenderedContent: JSX.Element; handleClose: () => void };
 
@@ -55,6 +55,7 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
     }: ReplyingToPostProps,
     ref: React.ForwardedRef<HTMLDivElement>
   ) {
+    const user = useUser();
     const [raw, setRaw] = useState<boolean>(false);
     const changeRaw = () => setRaw((raw) => !raw);
     const sendReply = () => {
@@ -81,8 +82,8 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
         />
         <CardContent>{!raw ? RenderedContent : <Typography>{content}</Typography>}</CardContent>
         <CardHeader
-          avatar={<Avatar src={getCookie('photoURL') as string} aria-label='icon' />}
-          title={getCookie('userName') + '@' + getCookie('userId')}
+          avatar={<Avatar src={user?.photoURL ?? ''} aria-label='icon' />}
+          title={(user?.displayName ?? '') + '@' + (user?.uid ?? '')}
         />
         <CardContent>
           <TextareaAutosize
