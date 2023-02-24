@@ -22,7 +22,7 @@ const Timeline = () => {
       like_count: 1,
       repost_count: 2,
       reply_count: 3,
-      reposted_by: 'testuser',
+      reposted_by: ['testuser'],
     },
     {
       post_id: '123457',
@@ -43,7 +43,7 @@ const Timeline = () => {
       like_count: 1,
       repost_count: 2,
       reply_count: 3,
-      reposted_by: 'testuser',
+      reposted_by: ['testuser'],
     },
   ];
   const [posts, setPosts] = useState<PostWithId[]>(testPosts);
