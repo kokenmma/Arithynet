@@ -38,6 +38,7 @@ const style = {
 const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
   function ReplyingToPostImpl(
     {
+      post_id,
       user_id,
       display_name,
       profile_image,

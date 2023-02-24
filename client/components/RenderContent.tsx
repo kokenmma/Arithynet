@@ -1,74 +1,49 @@
-import React from 'react';
-import { NextPage } from 'next';
+import { unified } from 'unified';
+import remarkMath from 'remark-math';
+import remarkRehype from 'remark-rehype';
+import rehypeKatex from 'rehype-katex';
+import rehypeStringify from 'rehype-stringify';
+import ReactMarkdown from 'react-markdown';
+import { remark } from 'remark';
 /** @ts-ignore **/
 import ReactHtmlParser from 'react-html-parser';
+import { useEffect, useState } from 'react';
 
-/*
-var md = require('markdown-it')(),
-  mk = require('markdown-it-katex');
-
-md.use(mk);
-*/
-
+// import katex css
 import 'katex/dist/katex.min.css';
-/** @ts-ignore **/
-import MarkdownIt from 'markdown-it';
-/** @ts-ignore **/
-import mk from 'markdown-it-katex';
-
-/* 
-const tm = require('markdown-it-texmath');
-const md = require('markdown-it')({ html: true }).use(tm, {
-  engine: require('katex'),
-  delimiters: 'dollars',
-});
-*/
+import { getDownloadURL, ref } from "firebase/storage";
+import { firestorage } from '../services/firebase';
 
 interface RenderContentProps {
   content: string;
   images: string[];
 }
 
-const RenderPost: NextPage<RenderContentProps> = React.memo<RenderContentProps>(
-  function RenderContentImpl({ content, images = [] }: RenderContentProps): JSX.Element {
-    const md = new MarkdownIt({
-      langPrefix: 'lang-',
-      preset: 'default',
-      linkify: true,
-      breaks: true,
-      html: true,
-      typegraphy: true,
-    });
-
-    md.use(mk);
-    let last_index = 0;
-    let image_index = 0;
-
-    console.log('content: ', content);
-    console.log('rendered_content: ', md.render(content));
-
-    return <>{ReactHtmlParser(md.render(content))}</>;
-
-    /*
-  while (true) {
-    const tikz_begin_index = content.indexOf('$$\\begin{tikzpicture}');
-    const tikz_end_index = content.indexOf('\\end{tikzpicture}$$');
-    if (tikz_begin_index === -1) {
-      content =
-        content.substring(0, last_index) + md.render(content.substring(last_index, content.length));
-      return <>{ReactHtmlParser(content)}</>;
+const RenderContent = ({ content, images = [] }: RenderContentProps) => {
+  const [replaced, setReplaced] = useState<string>('');
+  useEffect(() => {
+    (async()=>{
+    // replace tikz code block to image
+    const regex = /\\begin{tikzpicture}(.*?)\\end{tikzpicture}/ms;
+    let index = 0;
+    while (content.match(regex) !== null) {
+      const gsReference = ref(
+        firestorage,
+        "gs://arithynet.appspot.com/661b71486190e846f48823f555d0f488b04332db08cb960db672a7b4179c500f.svg"
+      );
+      const url = await getDownloadURL(gsReference);
+      console.log(url);
+      const replaceContent = images.length > index ? `![SVG](${images[index]}?sanitize=true)` : '';
+      content = content.replace(regex, replaceContent);
     }
-    const newly_rendered_content =
-      md.render(content.substring(last_index, tikz_begin_index)) +
-      `<img src="${images[image_index++]}" />`;
-    content =
-      content.substring(0, last_index) +
-      newly_rendered_content +
-      content.substring(tikz_end_index + '\\end{tikzpicture}$$'.length, content.length);
-    last_index += newly_rendered_content.length;
-  }
-  */
-  }
-);
+    setReplaced(content);
+  })()
+  }, [content]);
+  return (
+    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+      {replaced}
+    </ReactMarkdown>
+  );
+};
 
-export default RenderPost;
+export default RenderContent;
