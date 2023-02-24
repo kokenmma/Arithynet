@@ -1,77 +1,33 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/Arithynet/latex/pkg/tikzCompile"
+	"github.com/Arithynet/latex/pkg/envConfig"
+	"github.com/Arithynet/latex/pkg/fbStorage"
+	"github.com/Arithynet/latex/pkg/handler"
+	"github.com/rs/cors"
 )
 
-type Data struct {
-	Code string `json:"code"`
-}
-
-func NewData(txt string) *Data {
-	return &Data{Code: txt}
-}
-
-type StatusResponse struct {
-	Status        string `json:"status"`
-	InternalError error  `json:"internalerror,omitempty"`
-}
-
-func (s *Data) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	switch r.Method {
-	case http.MethodPost:
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			if err := json.NewEncoder(w).Encode(StatusResponse{Status: "err", InternalError: err}); err != nil {
-				log.Println(err)
-			}
-			return
-		}
-
-		code := tikz.NewTikz(string(body))
-		svg, err := code.MakeDir().Compile().Pdf2svg().SvgString()
-		defer code.RmoveDir()
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			if err := json.NewEncoder(w).Encode(&StatusResponse{Status: "err", InternalError: err}); err != nil {
-				log.Println(err)
-			}
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(NewData(svg)); err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			if err := json.NewEncoder(w).Encode(StatusResponse{Status: "err", InternalError: err}); err != nil {
-				log.Println(err)
-			}
-			return
-		}
-	default:
-		if err := json.NewEncoder(w).Encode(StatusResponse{Status: "permits only POST"}); err != nil {
-			log.Println(err)
-		}
-		w.WriteHeader(http.StatusMethodNotAllowed)
-	}
-}
-
 func main() {
+	env, err := envConfig.Parse()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fbStr, err := fbstorage.NewfbStorage(env.StorageBucketUrl).InitFbStorage(env.CredentialsFilepath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	mux := http.NewServeMux()
-	mux.Handle("/", NewData(""))
+	mux.Handle("/", handler.NewHandler(fbStr))
+
+	handler := cors.Default().Handler(mux)
 	srv := &http.Server{
 		Addr:              ":8080",
-		Handler:           mux,
+		Handler:           handler,
 		ReadHeaderTimeout: 3 * time.Second,
 		ReadTimeout:       5 * time.Second,
 		WriteTimeout:      5 * time.Second,

@@ -1,7 +1,7 @@
 package tikz
 
 import (
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -10,12 +10,11 @@ import (
 )
 
 type Tikz struct {
-	preamble     string
-	index        string
-	postamble    string
-	dirname      string
-	svg          string
-	stdoutStderr string
+	preamble  string
+	index     string
+	postamble string
+	dirname   string
+	svg       string
 }
 
 func NewTikz(index string) *Tikz {
@@ -44,64 +43,54 @@ func NewTikz(index string) *Tikz {
 	}
 }
 
-func (t *Tikz) MakeDir() *Tikz {
+func (t *Tikz) MakeDir() (*Tikz, error) {
 	dir, err := os.MkdirTemp("", "tikz")
 	if err != nil {
-		log.Println("MakeDir err")
-		log.Println(err)
-		return t
+		return nil, fmt.Errorf("error MakeDir err: %v", err)
 	}
 	t.dirname = dir
-	return t
+	return t, nil
 }
 
-func (t *Tikz) Compile() *Tikz {
+func (t *Tikz) Compile() (string, error) {
 	cmd := exec.Command("tectonic", "-X", "compile", "-o", t.dirname, "-")
 	cmd.Stdin = strings.NewReader(t.preamble + t.index + t.postamble)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("%s\n", stdoutStderr)
-		log.Println(err)
-		t.stdoutStderr += string(stdoutStderr)
-		return t
+		return "", fmt.Errorf("error compile code: %v\n%s", err, stdoutStderr)
 	}
-	return t
-}
 
-func (t *Tikz) Pdf2svg() *Tikz {
-	cmd := exec.Command("pdftocairo", "-svg", t.dirname+"/texput.pdf", t.dirname+"/texput.svg")
-	stdoutStderr, err := cmd.CombinedOutput()
+	cmd = exec.Command("pdftocairo", "-svg", t.dirname+"/texput.pdf", t.dirname+"/texput.svg")
+	stdoutStderr, err = cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("%s\n", stdoutStderr)
-		log.Println(err)
-		t.stdoutStderr += string(stdoutStderr)
-		return t
+		return "", fmt.Errorf("error pdf2svg: %v\n%s", err, stdoutStderr)
 	}
-	return t
-}
 
-func (t *Tikz) SvgString() (string, error) {
 	f, err := ioutil.ReadFile(t.dirname + "/texput.svg")
 	if err != nil {
-		log.Println(err)
-		var stdOE = errors.New(t.stdoutStderr)
-		return "", stdOE
+		return "", fmt.Errorf("error svg2string: %v", err)
 	}
 	return string(f), nil
 }
 
-func (t *Tikz) RmoveDir() *Tikz {
+func (t *Tikz) RmoveDir() error {
 	err := os.RemoveAll(t.dirname)
 	if err != nil {
-		log.Println("RmoveDir err")
-		log.Println(err)
+		return fmt.Errorf("error MakeDir err: %v", err)
 	}
-	return t
+	return nil
 }
 
-func TikzWrapper(index string) string {
-	res := NewTikz(index)
-	svg, _ := res.MakeDir().Compile().Pdf2svg().SvgString()
-	res.RmoveDir()
-	return svg
+func TikzWrapper(index string) (string, error) {
+	res, err := NewTikz(index).MakeDir()
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		if err := res.RmoveDir(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	return res.Compile()
 }
