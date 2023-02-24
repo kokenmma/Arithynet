@@ -4,11 +4,12 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Post from './Post';
-import { PostWithId } from '../types/Post';
-import { getPosts } from '../services/PostService';
+import { PostDB, PostWithId } from '../types/Post';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 const Timeline = () => {
-const testPosts:PostWithId[] = [
+  const testPosts: PostWithId[] = [
     {
       post_id: '123456',
       user_id: '123456abc',
@@ -50,9 +51,17 @@ const testPosts:PostWithId[] = [
     },
   ];
   const [posts, setPosts] = useState<PostWithId[]>(testPosts);
+
   useEffect(() => {
-    setPosts(testPosts);
-    (async () => setPosts(await getPosts()))();
+    onSnapshot(collection(db, 'posts'), (querySnapshot) => {
+      const posts: PostWithId[] = [];
+      querySnapshot.forEach((doc: any) => {
+        const { created_at, ...rest }: PostDB = doc.data();
+        const data: PostWithId = { created_at: new Date(created_at), ...rest, post_id: doc.id };
+        posts.push(data);
+      });
+      setPosts(posts);
+    });
   }, []);
 
   const theme = useTheme();

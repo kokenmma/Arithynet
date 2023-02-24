@@ -1,5 +1,6 @@
 /* Post Service */
 
+import { useEffect, useState } from 'react';
 import { Post, PostDB, PostInput, PostWithId } from '../types/Post';
 import { db } from './firebase';
 import {
@@ -18,21 +19,24 @@ import {
   WithFieldValue,
   setDoc,
   DocumentSnapshot,
+  onSnapshot,
 } from 'firebase/firestore';
 
-export const getPosts = async (): Promise<PostWithId[]> => {
-  // Get Posts from firebase for timeline
-  const querySnapshot: QuerySnapshot<PostDB> = await getDocs(
-    collection(db, 'posts') as CollectionReference<PostDB>
-  );
-  const posts: PostWithId[] = [];
-  querySnapshot.forEach((doc: QueryDocumentSnapshot<PostDB>) => {
-    const { created_at, ...rest }: PostDB = doc.data();
-    const data: PostWithId = { created_at: new Date(created_at), ...rest, post_id: doc.id };
-    posts.push(data);
-  });
-  return posts;
-};
+// export const getPosts = async (): Promise<PostWithId[]> => {
+//   const [posts, setPosts] = useState<PostWithId[]>([]);
+//   useEffect(() => {
+//     onSnapshot(collection(db, 'posts'), (querySnapshot) => {
+//       const posts: PostWithId[] = [];
+//       querySnapshot.forEach((doc: any) => {
+//         const { created_at, ...rest }: PostDB = doc.data();
+//         const data: PostWithId = { created_at: new Date(created_at), ...rest, post_id: doc.id };
+//         posts.push(data);
+//       });
+//       setPosts(posts);
+//     });
+//   }, []);
+//   return posts;
+// };
 
 export const addPost = async (post: PostInput): Promise<string> => {
   // Add Post to firebase
