@@ -1,13 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-/** @ts-ignore **/
-import ReactHtmlParser from 'react-html-parser';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
@@ -20,7 +18,7 @@ import Stack from '@mui/material/Stack';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
 import { CardProps } from '@mui/material';
-import type { Post as PostType, PostInput } from '../types/Post';
+import type { Post as PostType } from '../types/Post';
 import RenderContent from './RenderContent';
 
 export type PostProps = CardProps & PostType;
@@ -31,29 +29,16 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
     display_name,
     profile_image,
     content,
-    images,
+    images = [],
     created_at,
     like_count,
     repost_count,
     reply_count,
     reposted_by,
-    ...cardProps
+    ...card_props
   }: PostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
-  // render() の実装は以下の通りにする
-
-  // services/get-post.ts を使って，postId から photoURL，username，postText などを読みだす．
-  // postText を TikZ の部分で分割する．
-
-  // Markdown + LaTeX(TikZ を除く) の部分は markdown-it-katex で HTML に変換し
-  // TikZ は Go API で SVG 画像/コードに変換したあと
-  // それらをくっつけて postHTML を作る
-
-  // timestamp が返ってくるので，それから投稿日時の文字列 postTime を作る
-
-  // let postHTML: JSX.Element = useMemo(() => render(postText), [postText])
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [raw, setRaw] = useState<boolean>(false);
   const theme = useTheme();
@@ -77,7 +62,7 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   );
 
   return (
-    <Card sx={{ width: 600 }} ref={ref} {...cardProps}>
+    <Card sx={{ width: 600 }} ref={ref} {...card_props}>
       <CardHeader
         avatar={<Avatar src={profile_image} aria-label='icon' />}
         action={<Action />}

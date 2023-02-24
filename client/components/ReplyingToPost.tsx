@@ -42,7 +42,7 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
       display_name,
       profile_image,
       content,
-      images,
+      images = [],
       created_at,
       like_count,
       repost_count,

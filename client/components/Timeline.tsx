@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
-import Post, { PostProps } from './Post';
+import Post from './Post';
+import { Post as PostType } from '../types/Post';
+import { getPosts } from '../services/PostService';
 
 const Timeline = () => {
   const testPosts = [
@@ -11,14 +13,9 @@ const Timeline = () => {
       user_id: '123456abc',
       display_name: 'testuser',
       profile_image: '',
-      content: `
-        Euler-Lagrange Equetion:
-        $$
-        \\begin{align*}
-          \\frac{\\partial L}{\\partial q} = \\frac{\\mathrm{d}}{\\mathrm{d}t}\\frac{\\partial L}{\\partial p}
-        \\end{align*}
-        $$
-      `,
+      content:
+        '# Euler-Lagrange Equation:\n\n\
+        $$\\begin{align*}\\frac{\\partial L}{\\partial q} = \\frac{\\mathrm{d}}{\\mathrm{d}t}\\frac{\\partial L}{\\partial p}\\end{align*}$$',
       images: [],
       created_at: new Date(),
       like_count: 1,
@@ -47,8 +44,10 @@ const Timeline = () => {
       reposted_by: 'testuser',
     },
   ];
-  const [posts, setPosts] = useState<PostProps[]>(testPosts);
-  // 無限スクロールを実装する
+  const [posts, setPosts] = useState<PostType[]>(testPosts);
+  useEffect(() => {
+    (async () => setPosts(await getPosts()))();
+  }, []);
 
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('md'));

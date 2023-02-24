@@ -105,20 +105,3 @@ export const replyToPost = async (post_id: string, reply: PostInput): Promise<st
   console.log('Document written with ID: ', docRef.id);
   return docRef.id;
 };
-
-export const tikz2svg = async (tikzcode: string): Promise<string> => {
-  const response = await fetch(new URL(process.env.NEXT_PUBLIC_TIKZ_TO_SVG_SERVER_URL as string), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text/plain',
-    },
-    body: tikzcode,
-  });
-
-  return response.json().then(
-    (json) => json.location,
-    () => {
-      console.log('tikz2svg(): API Error!');
-    }
-  );
-};
