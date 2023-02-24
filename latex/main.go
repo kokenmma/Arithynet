@@ -5,21 +5,24 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Arithynet/latex/pkg/envConfig"
 	"github.com/Arithynet/latex/pkg/fbStorage"
 	"github.com/Arithynet/latex/pkg/handler"
 	"github.com/rs/cors"
 )
 
 func main() {
-	storageBucketUrl := "test-sns-eb77d.appspot.com"
-	credentialsFilepath := "./pkg/fbStorage/test-sns-key.json"
-	bucket, err := fbstorage.InitFb(storageBucketUrl, credentialsFilepath)
+	env, err := envConfig.Parse()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fbStr, err := fbstorage.NewfbStorage(env.StorageBucketUrl).InitFbStorage(env.CredentialsFilepath)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/", handler.NewHandler(bucket, storageBucketUrl))
+	mux.Handle("/", handler.NewHandler(fbStr))
 
 	handler := cors.Default().Handler(mux)
 	srv := &http.Server{

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 
 	firebase "firebase.google.com/go"
 
@@ -12,11 +13,22 @@ import (
 	"google.golang.org/api/option"
 )
 
-func InitFb(stgBucket, crdFile string) (*storage.BucketHandle, error) {
-	config := &firebase.Config{
-		StorageBucket: stgBucket, //"test-sns-eb77d.appspot.com",
+type FbStorage struct {
+	StorageBucket string
+	BucketHandle  *storage.BucketHandle
+}
+
+func NewfbStorage(stgBucket string) *FbStorage {
+	return &FbStorage{
+		StorageBucket: stgBucket,
 	}
-	opt := option.WithCredentialsFile(crdFile) //("test-sns-key.json")
+}
+
+func (f *FbStorage) InitFbStorage(creFile string) (*FbStorage, error) {
+	config := &firebase.Config{
+		StorageBucket: f.StorageBucket,
+	}
+	opt := option.WithCredentialsFile(creFile)
 	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing app: %v", err)
@@ -31,11 +43,12 @@ func InitFb(stgBucket, crdFile string) (*storage.BucketHandle, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error get bucket: %v", err)
 	}
-	return bucket, err
+	f.BucketHandle = bucket
+	return f, err
 }
 
-func SvgSave(bucket *storage.BucketHandle, filename, svg string) error {
-	writer := bucket.Object(filename).NewWriter(context.Background())
+func (f *FbStorage) SaveSvg(filename, svg string) (string, error) {
+	writer := f.BucketHandle.Object(filename).NewWriter(context.Background())
 	//writer.ObjectAttrs.ContentType = "text/plain"
 	//writer.ObjectAttrs.CacheControl = "no-cache"
 	writer.ObjectAttrs.ACL = []storage.ACLRule{
@@ -48,11 +61,17 @@ func SvgSave(bucket *storage.BucketHandle, filename, svg string) error {
 	buf := bytes.NewBuffer([]byte(svg))
 
 	if _, err := io.Copy(writer, buf); err != nil {
-		return fmt.Errorf("error save svg: %v", err)
+		return "", fmt.Errorf("error save svg: %v", err)
 	}
 	if err := writer.Close(); err != nil {
-		return fmt.Errorf("error writer close: %v", err)
+		return "", fmt.Errorf("error writer close: %v", err)
 	}
 
-	return nil
+	url := &url.URL{
+		Scheme: "http",
+		Host:   "storage.googleapis.com",
+		Path:   f.StorageBucket,
+	}
+	url = url.JoinPath(filename)
+	return url.String(), nil
 }

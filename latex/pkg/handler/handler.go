@@ -9,20 +9,17 @@ import (
 	"log"
 	"net/http"
 
-	"cloud.google.com/go/storage"
 	fbstorage "github.com/Arithynet/latex/pkg/fbStorage"
 	"github.com/Arithynet/latex/pkg/tikz"
 )
 
 type Handler struct {
-	bucket           *storage.BucketHandle
-	storageBucketUrl string
+	fbStorage *fbstorage.FbStorage
 }
 
-func NewHandler(backet *storage.BucketHandle, storageBucketUrl string) *Handler {
+func NewHandler(fbStr *fbstorage.FbStorage) *Handler {
 	return &Handler{
-		bucket:           backet,
-		storageBucketUrl: storageBucketUrl,
+		fbStorage: fbStr,
 	}
 }
 
@@ -68,7 +65,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		filename := getHashFilename(svg)
-		err = fbstorage.SvgSave(h.bucket, filename, svg)
+		url, err := h.fbStorage.SaveSvg(filename, svg)
 		if err != nil {
 			log.Printf("error save svg: %v", err)
 			internaServerlError(w, err)
@@ -76,7 +73,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(SendData{Location: "gs://" + h.storageBucketUrl + "/" + filename})
+		err = json.NewEncoder(w).Encode(SendData{Location: url})
 		if err != nil {
 			log.Printf("error encode location: %v", err)
 			internaServerlError(w, err)
