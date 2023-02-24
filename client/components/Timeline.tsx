@@ -8,7 +8,7 @@ import { PostWithId } from '../types/Post';
 import { getPosts } from '../services/PostService';
 
 const Timeline = () => {
-  const testPosts = [
+const testPosts:PostWithId[] = [
     {
       post_id: '123456',
       user_id: '123456abc',
@@ -27,18 +27,16 @@ const Timeline = () => {
       user_id: '123456abc',
       display_name: 'testuser',
       profile_image: '',
-      content: `
-      $$
-      L = \\frac{1}{2} \\rho v^2 S C_L
-      $$`,
+      content: `\n$$\nL = \\frac{1}{2} \\rho v^2 S C_L\n$$`,
       images: [],
       created_at: new Date(),
       like_count: 1,
       repost_count: 2,
       reply_count: 3,
-      reposted_by: 'testuser',
+      reposted_by: ['testuser'],
     },
     {
+      post_id: '123458',
       user_id: '123456abc',
       display_name: 'testuser',
       profile_image: '',
@@ -53,8 +51,8 @@ const Timeline = () => {
   ];
   const [posts, setPosts] = useState<PostWithId[]>(testPosts);
   useEffect(() => {
-    // setPosts(testPosts);
-    // (async () => setPosts(await getPosts()))();
+    setPosts(testPosts);
+    (async () => setPosts(await getPosts()))();
   }, []);
 
   const theme = useTheme();
