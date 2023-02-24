@@ -11,7 +11,10 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import ReplyIcon from '@mui/icons-material/Reply';
 import RepeatIcon from '@mui/icons-material/Repeat';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import Modal from '@mui/material/Modal';
+import Stack from '@mui/material/Stack';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
 import { CardProps } from '@mui/material';
@@ -59,23 +62,34 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   // timestamp が返ってくるので，それから投稿日時の文字列 postTime を作る
 
   // let postHTML: JSX.Element = useMemo(() => render(postText), [postText])
-  let postHTML: JSX.Element = <span>Welcome to UEC!</span>;
+  let postHTML: JSX.Element = <span>Welcome to UEC!(html)</span>;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [raw, setRaw] = useState<boolean>(false);
   const theme = useTheme();
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
+  const changeRaw = () => setRaw((raw) => !raw);
+
+  const Action = () => (
+    <Stack direction='row'>
+      <IconButton onClick={changeRaw}>
+        {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+      </IconButton>
+      <Details postId={postId} />
+    </Stack>
+  );
 
   return (
     <Card sx={{ width: 600 }} ref={ref} {...cardProps}>
       <CardHeader
         avatar={<Avatar src={photoURL} aria-label='icon' />}
-        action={<Details postId={postId} />}
+        action={<Action />}
         title={userName + '@' + userId}
         subheader={postTime}
       />
-      <CardContent>{postHTML}</CardContent>
+      <CardContent>{!raw ? postHTML : <Typography>{postText}</Typography>}</CardContent>
       <CardActions disableSpacing>
         <ReplyIcon onClick={handleOpen} />
         <Modal

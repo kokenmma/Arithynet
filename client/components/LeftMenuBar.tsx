@@ -40,40 +40,46 @@ const LeftMenuBar = () => {
         flexShrink: { md: 0 },
       }}
     >
-      <Stack divider={<Divider flexItem />}>
+      <Stack divider={<Divider flexItem />} spacing={2}>
         <List>
-          <ListItem disablePadding>
+          <ListItem>
             <ListItemButton>
               <ListItemIcon>
                 <HomeOutlinedIcon />
               </ListItemIcon>
-              {matches && <ListItemText primary='Home' />}
+              {matches && <ListItemText primary='Home' primaryTypographyProps={{ fontSize: 20 }} />}
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
+          <ListItem>
             <ListItemButton>
               <ListItemIcon>
                 <Badge badgeContent={notificationCount} color='secondary'>
                   <NotificationsNoneOutlinedIcon />
                 </Badge>
               </ListItemIcon>
-              {matches && <ListItemText primary='Notification' />}
+              {matches && (
+                <ListItemText primary='Notification' primaryTypographyProps={{ fontSize: 20 }} />
+              )}
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
+          <ListItem>
             <ListItemButton>
               <ListItemIcon>
                 <BookmarkBorderOutlinedIcon />
               </ListItemIcon>
-              {matches && <ListItemText primary='Bookmarks' />}
+              {matches && (
+                <ListItemText primary='Bookmarks' primaryTypographyProps={{ fontSize: 20 }} />
+              )}
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
+          <ListItem>
             <ListItemButton>
               <ListItemIcon>
                 <SettingsOutlinedIcon />
               </ListItemIcon>
-              {matches && <ListItemText primary='Settings' />}
+              {matches && (
+                <ListItemText primary='Settings' primaryTypographyProps={{ fontSize: 20 }} />
+              )}
             </ListItemButton>
           </ListItem>
         </List>
@@ -86,8 +92,7 @@ const LeftMenuBar = () => {
             width: matches
               ? 0.7 * LeftMenuBarWidthWhenGreaterThanMd
               : LeftMenuBarWidthWhenLessThanMd,
-            marginLeft: 'auto',
-            marginRight: 'auto',
+            margin: '0 auto',
           }}
         >
           <CreateIcon />
