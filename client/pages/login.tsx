@@ -19,7 +19,7 @@ const LoginPage = () => {
     (async () => {
       if (user) await router.push('/');
     })();
-  }, []);
+  }, [user, router]);
 
   return (
     <Grid container alignItems='center' justifyContent='center' direction='column'>

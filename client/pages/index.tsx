@@ -11,7 +11,7 @@ const Index = () => {
   const user = useUser();
   useEffect(() => {
     if (!user) window.location.href = '/login';
-  }, []);
+  }, [user]);
   return (
     <Container>
       {user?.displayName}
