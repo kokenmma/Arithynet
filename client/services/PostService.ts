@@ -1,15 +1,32 @@
 /* Post Service */
 
-import { Post, PostInput } from '../types/Post';
+import { Post, PostDB, PostInput, PostWithId } from '../types/Post';
 import { db } from './firebase';
-import { collection, getDoc, getDocs, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
+import {
+  collection,
+  getDoc,
+  getDocs,
+  addDoc,
+  doc,
+  updateDoc,
+  increment,
+  CollectionReference,
+  DocumentReference,
+  QuerySnapshot,
+  QueryDocumentSnapshot,
+  Query,
+} from 'firebase/firestore';
 
-export const getPosts = async (): Promise<Post[]> => {
+export const getPosts = async (): Promise<PostWithId[]> => {
   // Get Posts from firebase for timeline
-  const querySnapshot = await getDocs(collection(db, 'posts'));
-  const posts: Post[] = [];
-  querySnapshot.forEach((doc) => {
-    posts.push(doc.data() as Post);
+  const querySnapshot: QuerySnapshot<PostDB> = await getDocs(
+    collection(db, 'posts') as CollectionReference<PostDB>
+  );
+  const posts: PostWithId[] = [];
+  querySnapshot.forEach((doc: QueryDocumentSnapshot<PostDB>) => {
+    const { created_at, ...rest }: PostDB = doc.data();
+    const data: PostWithId = { created_at: new Date(created_at), ...rest, post_id: doc.id };
+    posts.push(data);
   });
   return posts;
 };
@@ -19,15 +36,18 @@ export const addPost = async (
   reposted_by: string | null = null
 ): Promise<string> => {
   // Add Post to firebase
-  const newRecord: Post = {
+  const newRecord: PostDB = {
     ...post,
-    created_at: new Date(),
+    created_at: new Date().toDateString(),
     like_count: 0,
     repost_count: 0,
     reply_count: 0,
     reposted_by: reposted_by,
   };
-  const docRef = await addDoc(collection(db, 'posts'), newRecord);
+  const docRef: DocumentReference<PostDB> = await addDoc(
+    collection(db, 'posts') as CollectionReference<PostDB>,
+    newRecord
+  );
   console.log('Document written with ID: ', docRef.id);
   return docRef.id;
 };

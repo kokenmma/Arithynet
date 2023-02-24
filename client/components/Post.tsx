@@ -19,14 +19,15 @@ import Stack from '@mui/material/Stack';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
 import { CardProps } from '@mui/material';
-import type { Post as PostType } from '../types/Post';
+import type { PostWithId } from '../types/Post';
 import RenderContent from './RenderContent';
 import { upLikeCount, upreplyCount } from '../services/PostService';
 
-export type PostProps = CardProps & PostType;
+export type PostProps = CardProps & PostWithId;
 
 const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   {
+    post_id,
     user_id,
     display_name,
     profile_image,
@@ -87,6 +88,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
           sx={{ '& .MuiPaper-root-MuiCard-root': { padding: 0 } }}
         >
           <ReplyingToPost
+            post_id={post_id}
             user_id={user_id}
             display_name={display_name}
             profile_image={profile_image}
