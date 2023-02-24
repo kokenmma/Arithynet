@@ -4,7 +4,7 @@ const nextConfig = {
   compiler: (() => {
     let compilerConfig = {
       styledComponents: true,
-      emotion: true
+      emotion: true,
     };
     if (process.env.NODE_ENV === 'production') {
       compilerConfig = {
