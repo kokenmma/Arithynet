@@ -1,41 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
-import Post, { PostProps } from './Post';
+import Post from './Post';
+import { Post as PostType } from '../types/Post';
+import { getPosts } from '../services/PostService';
 
 const Timeline = () => {
   const testPosts = [
     {
-      postId: 123456,
-      photoURL: '',
-      userName: 'testuser',
-      userId: '123456abc',
-      postText: 'Welcome to UEC!(text)',
-      replyCount: 1,
-      repostCount: 2,
-      favCount: 3,
-      postTime: 'February 21, 2023',
-      isFavedByU: true,
-      isRepostedByU: true,
+      user_id: '123456abc',
+      display_name: 'testuser',
+      profile_image: '',
+      content:
+        '# Euler-Lagrange Equation:\n\n\
+        $$\\begin{align*}\\frac{\\partial L}{\\partial q} = \\frac{\\mathrm{d}}{\\mathrm{d}t}\\frac{\\partial L}{\\partial p}\\end{align*}$$',
+      images: [],
+      created_at: new Date(),
+      like_count: 1,
+      repost_count: 2,
+      reply_count: 3,
+      reposted_by: 'testuser',
     },
     {
-      postId: 123456,
-      photoURL: '',
-      userName: 'testuser',
-      userId: '123456abc',
-      postText: 'Welcome to UEC!(text)',
-      replyCount: 1,
-      repostCount: 2,
-      favCount: 5,
-      postTime: 'February 21, 2023',
-      isFavedByU: true,
-      isRepostedByU: true,
+      user_id: '123456abc',
+      display_name: 'testuser',
+      profile_image: '',
+      content: `
+        Hamilton's Equation:
+        $$
+        \\begin{align*}
+          \\dot{q} &= \\frac{\\partial H}{\\partial p} \\\\
+          \\dot{p} &= -\\frac{\\partial H}{\\partial q}
+        \\end{align*}
+        $$
+      `,
+      images: [],
+      created_at: new Date(),
+      like_count: 1,
+      repost_count: 2,
+      reply_count: 3,
+      reposted_by: 'testuser',
     },
   ];
-  const [posts, setPosts] = useState<PostProps[]>(testPosts);
-  // 無限スクロールを実装する
+  const [posts, setPosts] = useState<PostType[]>(testPosts);
+  useEffect(() => {
+    (async () => setPosts(await getPosts()))();
+  }, []);
 
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('md'));

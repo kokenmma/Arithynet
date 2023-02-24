@@ -1,5 +1,5 @@
-import React from 'react';
-import { getCookie } from 'cookies-next';
+import React, { useState, useRef, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -13,11 +13,14 @@ import IconButton from '@mui/material/IconButton';
 import PublishIcon from '@mui/icons-material/Publish';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { CardProps } from '@mui/material';
+import { PostInput } from '../types/Post';
+import { getImages } from '../services/latexserver';
+import { addPost } from '../services/PostService';
 
 const style = {
   position: 'absolute' as 'absolute',
-  padding: '0px',
-  top: '20%',
+  padding: 0,
+  top: 180,
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 680,
@@ -26,10 +29,9 @@ const style = {
   boxShadow: 24,
   p: 4,
   borderRadius: 5,
-  '& .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation1.MuiCard-root.MuiPaper-root-MuiCard-root':
-    {
-      padding: 0,
-    },
+  '& .MuiPaper-root-MuiCard-root': {
+    padding: 0,
+  },
 };
 
 type CreatingPostProps = CardProps & { handleClose: () => void };
@@ -38,18 +40,51 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   { handleClose, ...cardProps }: CreatingPostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
-  const sendPost = () => {
-    // DB に投稿を送信する
+  const [postInput, setPostInput] = useState<PostInput>({
+    user_id: '',
+    display_name: '',
+    profile_image: '',
+    content: '',
+    images: [],
+  });
+  const content_ref = useRef<HTMLTextAreaElement | null>(null);
+  const sendPost = async () => {
+    if (content_ref) {
+      const got_images = await getImages(postInput.content);
+      setPostInput(({ content, images, ...rest }: PostInput) => ({
+        content: content,
+        images: got_images,
+        ...rest,
+      }));
+      await addPost(postInput);
+    }
     handleClose();
   };
 
   const theme = useTheme();
 
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setPostInput({
+          user_id: user.uid,
+          display_name: user.displayName ?? '',
+          profile_image: user.photoURL ?? '',
+          content: '',
+          images: [],
+        });
+      } else {
+        // サインイン画面にリダイレクト
+      }
+    });
+  }, []);
+
   return (
     <Card sx={style} ref={ref} {...cardProps}>
       <CardHeader
-        avatar={<Avatar src={getCookie('photoURL') as string} aria-label='icon' />}
-        title={getCookie('userName') + '@' + getCookie('userId')}
+        avatar={<Avatar src={postInput.profile_image} aria-label='icon' />}
+        title={postInput.display_name + '@' + postInput.user_id}
       />
       <CardContent>
         <TextareaAutosize
@@ -66,6 +101,7 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
             color: theme.palette.text.primary,
             fontSize: 18,
           }}
+          ref={content_ref}
         />
       </CardContent>
       <CardActions disableSpacing>
