@@ -12,9 +12,9 @@ import {
   increment,
   CollectionReference,
   DocumentReference,
+  DocumentData,
   QuerySnapshot,
   QueryDocumentSnapshot,
-  Query,
 } from 'firebase/firestore';
 
 export const getPosts = async (): Promise<PostWithId[]> => {
@@ -54,7 +54,7 @@ export const addPost = async (
 
 export const upLikeCount = async (post_id: string): Promise<void> => {
   // Update like count
-  const docRef = doc(db, 'posts', post_id);
+  const docRef: DocumentReference<DocumentData> = doc(db, 'posts', post_id);
   await updateDoc(docRef, {
     like_count: increment(1),
   });
@@ -62,7 +62,7 @@ export const upLikeCount = async (post_id: string): Promise<void> => {
 
 export const upreplyCount = async (post_id: string): Promise<void> => {
   // Update like count
-  const docRef = doc(db, 'posts', post_id);
+  const docRef: DocumentReference<DocumentData> = doc(db, 'posts', post_id);
   await updateDoc(docRef, {
     reply_count: increment(1),
   });
@@ -70,7 +70,7 @@ export const upreplyCount = async (post_id: string): Promise<void> => {
 
 export const getPost = async (post_id: string): Promise<Post> => {
   // Get Post from firebase
-  const docRef = doc(db, 'posts', post_id);
+  const docRef: DocumentReference<DocumentData> = doc(db, 'posts', post_id);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
     return docSnap.data() as Post;
@@ -81,7 +81,7 @@ export const getPost = async (post_id: string): Promise<Post> => {
 
 export const rePost = async (post_id: string, user_id: string): Promise<void> => {
   // Repost
-  const docRef = doc(db, 'posts', post_id);
+  const docRef: DocumentReference<DocumentData> = doc(db, 'posts', post_id);
   const post = await getPost(post_id);
   // Add Post to firebase
   await addPost(
@@ -100,12 +100,16 @@ export const rePost = async (post_id: string, user_id: string): Promise<void> =>
   });
 };
 
-export const getRepaly = async (post_id: string): Promise<Post[]> => {
+export const getReply = async (post_id: string): Promise<PostWithId[]> => {
   // Get Posts from firebase for timeline
-  const querySnapshot = await getDocs(collection(db, 'posts', post_id, 'replys'));
-  const posts: Post[] = [];
-  querySnapshot.forEach((doc) => {
-    posts.push(doc.data() as Post);
+  const querySnapshot: QuerySnapshot<PostDB> = await getDocs(
+    collection(db, 'posts', post_id, 'replys') as CollectionReference<PostDB>
+  );
+  const posts: PostWithId[] = [];
+  querySnapshot.forEach((doc: QueryDocumentSnapshot<PostDB>) => {
+    const { created_at, ...rest }: PostDB = doc.data();
+    const data: PostWithId = { created_at: new Date(created_at), ...rest, post_id: doc.id };
+    posts.push(data);
   });
   return posts;
 };
@@ -114,14 +118,17 @@ export const replyToPost = async (post_id: string, reply: PostInput): Promise<st
   // Update reply count
   await upreplyCount(post_id);
   // Update reply
-  const docRef = await addDoc(collection(db, 'posts', post_id, 'replys'), {
-    ...reply,
-    created_at: new Date(),
-    like_count: 0,
-    repost_count: 0,
-    reply_count: 0,
-    reposted_by: null,
-  });
+  const docRef: DocumentReference<PostDB> = await addDoc(
+    collection(db, 'posts', post_id, 'replys') as CollectionReference<PostDB>,
+    {
+      ...reply,
+      created_at: new Date().toDateString(),
+      like_count: 0,
+      repost_count: 0,
+      reply_count: 0,
+      reposted_by: null,
+    }
+  );
   console.log('Document written with ID: ', docRef.id);
   return docRef.id;
 };
