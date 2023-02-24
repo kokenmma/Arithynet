@@ -5,6 +5,7 @@ import { RecoilRoot } from 'recoil';
 import { useAuth, useUser } from '../lib/auth';
 import { useEffect } from 'react';
 import { router } from 'next/client';
+import { useRouter } from 'next/router';
 
 const darkTheme = createTheme({
   palette: {

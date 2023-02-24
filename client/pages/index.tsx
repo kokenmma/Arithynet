@@ -9,6 +9,9 @@ import { router } from 'next/client';
 
 const Index = () => {
   const user = useUser();
+  useEffect(()=>{
+    if(!user)window.location.href="/login";
+  },[])
   return (
     <Container>
       {user?.displayName}
