@@ -41,9 +41,9 @@ func internaServerlError(w http.ResponseWriter, err error) {
 	}
 }
 
-func getHashFilename(svg string) string {
-	b := sha256.Sum256([]byte(svg))
-	return hex.EncodeToString(b[:]) + ".svg"
+func getHashFilename(img []byte) string {
+	b := sha256.Sum256(img)
+	return hex.EncodeToString(b[:])
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -57,17 +57,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		svg, err := tikz.TikzWrapper(string(body))
+		png, err := tikz.TikzWrapper(string(body))
 		if err != nil {
-			log.Printf("error tikz->svg: %v", err)
+			log.Printf("error tikz->png: %v", err)
 			internaServerlError(w, err)
 			return
 		}
 
-		filename := getHashFilename(svg)
-		url, err := h.fbStorage.SaveSvg(filename, svg)
+		filename := getHashFilename(png) + ".png"
+		url, err := h.fbStorage.SaveImg(filename, png)
 		if err != nil {
-			log.Printf("error save svg: %v", err)
+			log.Printf("error save img: %v", err)
 			internaServerlError(w, err)
 			return
 		}

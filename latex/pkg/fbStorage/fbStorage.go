@@ -47,7 +47,7 @@ func (f *FbStorage) InitFbStorage(creFile string) (*FbStorage, error) {
 	return f, err
 }
 
-func (f *FbStorage) SaveSvg(filename, svg string) (string, error) {
+func (f *FbStorage) SaveImg(filename string, img []byte) (string, error) {
 	writer := f.BucketHandle.Object(filename).NewWriter(context.Background())
 	//writer.ObjectAttrs.ContentType = "text/plain"
 	//writer.ObjectAttrs.CacheControl = "no-cache"
@@ -58,10 +58,10 @@ func (f *FbStorage) SaveSvg(filename, svg string) (string, error) {
 		},
 	}
 
-	buf := bytes.NewBuffer([]byte(svg))
+	buf := bytes.NewBuffer(img)
 
 	if _, err := io.Copy(writer, buf); err != nil {
-		return "", fmt.Errorf("error save svg: %v", err)
+		return "", fmt.Errorf("error save img: %v", err)
 	}
 	if err := writer.Close(); err != nil {
 		return "", fmt.Errorf("error writer close: %v", err)
