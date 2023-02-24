@@ -47,6 +47,8 @@ const Post = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   const handleClose = () => setIsOpen(false);
   const changeRaw = () => setRaw((raw) => !raw);
 
+  const handleRepost = async () => {};
+
   const Action = () => (
     <Stack direction='row'>
       <IconButton onClick={changeRaw}>

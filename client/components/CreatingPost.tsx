@@ -15,6 +15,7 @@ import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { CardProps } from '@mui/material';
 import { PostInput } from '../types/Post';
 import { getImages } from '../services/latexserver';
+import { addPost } from '../services/PostService';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -55,6 +56,7 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
         images: got_images,
         ...rest,
       }));
+      await addPost(postInput);
     }
     handleClose();
   };
