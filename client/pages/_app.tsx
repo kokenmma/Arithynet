@@ -1,6 +1,11 @@
 import { AppProps } from 'next/app';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { RecoilRoot } from 'recoil';
+import { useAuth, useUser } from '../lib/auth';
+import { useEffect } from 'react';
+import { router } from 'next/client';
+import { useRouter } from 'next/router';
 
 const darkTheme = createTheme({
   palette: {
@@ -11,12 +16,25 @@ const darkTheme = createTheme({
   },
 });
 
+type Props = {
+  children: JSX.Element;
+};
+
+const Auth = ({ children }: Props): JSX.Element => {
+  const isLoading = useAuth();
+  return isLoading ? <p>Loading...</p> : children;
+};
+
 const App = ({ Component, pageProps }: AppProps) => {
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <Component {...pageProps} />
-    </ThemeProvider>
+    <RecoilRoot>
+      <Auth>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </Auth>
+    </RecoilRoot>
   );
 };
 
