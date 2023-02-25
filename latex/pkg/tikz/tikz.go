@@ -38,9 +38,11 @@ func NewTikz(index string) *Tikz {
 
 \begin{document}
 \beginpgfgraphicnamed{texput}
+\resizebox{25cm}{!}{
 `,
 		index: index,
 		postamble: `
+}
 \endpgfgraphicnamed
 \end{document}`,
 	}
