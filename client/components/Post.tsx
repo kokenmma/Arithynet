@@ -14,17 +14,27 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import KeyboardReturnOutlinedIcon from '@mui/icons-material/KeyboardReturnOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
+import Collapse from '@mui/material/Collapse';
+import Grid from '@mui/material/Grid';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
 import { CardProps, IconButtonProps } from '@mui/material';
-import type { PostWithId } from '../types/Post';
+import type { PostDB, PostDBInput, PostWithId } from '../types/Post';
 import RenderContent from './RenderContent';
 import { removeLikeCount, upLikeCount, upreplyCount } from '../services/PostService';
 import { useUser } from '../lib/auth';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
-export type PostProps = CardProps & PostWithId;
+export type PostProps = CardProps &
+  PostWithId & {
+    enableReplyTree?: boolean;
+  };
 
 const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(function PostImpl(
   {
@@ -39,6 +49,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
     repost_count,
     reply_count,
     reposted_by,
+    enableReplyTree = true,
     ...card_props
   }: PostProps,
   ref: React.ForwardedRef<HTMLDivElement>
@@ -75,15 +86,6 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
     setIsLiked(like_count.includes(user.uid));
   }, [user, like_count]);
 
-  const Action = () => (
-    <Stack direction='row'>
-      <IconButton onClick={changeRaw}>
-        {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-      </IconButton>
-      {/* <Details postId={postId} /> */}
-    </Stack>
-  );
-
   const RenderedContent: JSX.Element = useMemo(
     () => <RenderContent content={content} images={images} />,
     [content, images]
@@ -93,11 +95,40 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
     expand: boolean;
   }
 
-  const ExpandMore: NextPage<ExpandMoreProps> = (props: ExpandMoreProps) => {
-    const { expand, ...other } = props;
+  const [expanded, setExpanded] = useState<boolean>(false);
+  const [hasBeenExpanded, setHasBeenExpanded] = useState<boolean>(false);
+  const [replies, setReplies] = useState<PostWithId[]>([]);
+
+  const handleExpandClick = () => {
+    setHasBeenExpanded(true);
+    setExpanded(!expanded);
+  };
+
+  // 初期レンダリング後，初めてリプ欄展開ボタンを押したときに一度だけ返信をロードする
+  useEffect(() => {
+    onSnapshot(
+      query(collection(db, 'posts', post_id, 'replies'), orderBy('created_at', 'desc')),
+      (querySnapshot) => {
+        console.log('loading replies...');
+        const replies: PostWithId[] = [];
+        querySnapshot.forEach((doc: any) => {
+          const { created_at, ...rest }: PostDBInput = doc.data();
+          const data: PostWithId = {
+            created_at: new Date(created_at.seconds * 1000),
+            ...rest,
+            post_id: doc.id,
+          };
+          replies.push(data);
+        });
+        setReplies(replies);
+      }
+    );
+  }, [hasBeenExpanded, post_id]);
+
+  const ExpandMore: NextPage<ExpandMoreProps> = ({ expand, ...rest }: ExpandMoreProps) => {
     return (
       <IconButton
-        {...other}
+        {...rest}
         sx={{
           transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
           marginLeft: 'auto',
@@ -110,10 +141,17 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
   };
 
   return (
-    <Card sx={{ width: 600 }} ref={ref} {...card_props}>
+    <Card ref={ref} {...card_props}>
       <CardHeader
         avatar={<Avatar src={profile_image} aria-label='icon' />}
-        action={<Action />}
+        action={
+          <Stack direction='row'>
+            <IconButton onClick={changeRaw}>
+              {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+            </IconButton>
+            {/* <Details postId={postId} /> */}
+          </Stack>
+        }
         title={display_name + '@' + user_id}
         subheader={created_at.toDateString()}
       />
@@ -144,7 +182,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
           />
         </Modal>
         <Typography variant='body2'>{reply_count}</Typography>
-        <IconButton aria-label='repost' disabled>
+        <IconButton aria-label='repost'>
           {/* Repost の処理の呼び出しを行う */}
           <RepeatIcon sx={isReposted ? { color: 'green' } : {}} />
         </IconButton>
@@ -154,10 +192,36 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
           <FavoriteIcon sx={isLiked ? { color: 'red' } : {}} />
         </IconButton>
         <Typography variant='body2'>{like_count.length}</Typography>
-        <IconButton aria-label='share' disabled>
+        <IconButton aria-label='share'>
           <ShareIcon />
         </IconButton>
+        {enableReplyTree && (
+          <ExpandMore
+            expand={expanded}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label='show more'
+          >
+            <ExpandMoreIcon />
+          </ExpandMore>
+        )}
       </CardActions>
+      <Collapse in={expanded} timeout='auto' unmountOnExit>
+        <CardContent>
+          <Stack divider={<Divider />}>
+            {replies.map((reply, index) => (
+              <Grid key={index} container spacing={0}>
+                <Grid item xs={1}>
+                  <KeyboardReturnOutlinedIcon sx={{ transform: 'rotate(90deg)' }} />
+                </Grid>
+                <Grid item xs={11}>
+                  <Post {...reply} sx={{ width: 530, marginRight: 0 }} enableReplyTree={false} />
+                </Grid>
+              </Grid>
+            ))}
+          </Stack>
+        </CardContent>
+      </Collapse>
     </Card>
   );
 });

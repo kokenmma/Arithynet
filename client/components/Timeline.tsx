@@ -53,11 +53,15 @@ const Timeline = () => {
   const [posts, setPosts] = useState<PostWithId[]>([]);
 
   useEffect(() => {
-    onSnapshot(query(collection(db, 'posts'), orderBy('created_at','desc')), (querySnapshot) => {
+    onSnapshot(query(collection(db, 'posts'), orderBy('created_at', 'desc')), (querySnapshot) => {
       const posts: PostWithId[] = [];
       querySnapshot.forEach((doc: any) => {
         const { created_at, ...rest }: PostDBInput = doc.data();
-        const data: PostWithId = { created_at: new Date(created_at.seconds * 1000), ...rest, post_id: doc.id };
+        const data: PostWithId = {
+          created_at: new Date(created_at.seconds * 1000),
+          ...rest,
+          post_id: doc.id,
+        };
         posts.push(data);
       });
       setPosts(posts);
@@ -71,7 +75,7 @@ const Timeline = () => {
   return (
     <Stack divider={<Divider />}>
       {posts.map((post, index) => (
-        <Post key={index} {...post} />
+        <Post key={index} {...post} sx={{ width: 600 }} />
       ))}
     </Stack>
   );

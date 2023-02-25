@@ -26,9 +26,9 @@ import RenderContent from './RenderContent';
 const style = {
   position: 'absolute' as 'absolute',
   padding: 0,
-  top: 180,
+  top: 150,
   left: '50%',
-  transform: 'translate(-50%, -50%)',
+  transform: 'translate(-50%, 0%)',
   width: 680,
   bgcolor: 'background.default',
   border: 'none',
@@ -40,7 +40,9 @@ const style = {
   },
 };
 
-type CreatingPostProps = CardProps & { handleClose: () => void };
+interface CreatingPostProps extends CardProps {
+  handleClose: () => void;
+}
 
 const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(function CreatingPostImpl(
   { handleClose, ...cardProps }: CreatingPostProps,
@@ -135,7 +137,7 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
           maxRows={10}
           hidden={raw}
         />
-        {raw ? preview : <></>}
+        {raw && preview}
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label='add image' sx={{ display: 'none' }}>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { getCookie } from 'cookies-next';
+import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -18,15 +18,23 @@ import IconButton from '@mui/material/IconButton';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import Details from './Details';
 import { PostProps } from './Post';
+import { replyToPost } from '../services/PostService';
+import { useUser } from '../lib/auth';
+import { getImages } from '../services/latexserver';
+import type { Post, PostInput, PostWithId } from '../types/Post';
+import RenderContent from './RenderContent';
 
-type ReplyingToPostProps = PostProps & { RenderedContent: JSX.Element; handleClose: () => void };
+interface ReplyingToPostProps extends PostProps {
+  RenderedContent: JSX.Element;
+  handleClose: () => void;
+}
 
 const style = {
   position: 'absolute' as 'absolute',
   padding: '0px',
-  top: '25%',
+  top: 150,
   left: '50%',
-  transform: 'translate(-50%, -50%)',
+  transform: 'translate(-50%, 0%)',
   width: 680,
   bgcolor: 'background.default',
   border: 'none',
@@ -55,34 +63,91 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
     }: ReplyingToPostProps,
     ref: React.ForwardedRef<HTMLDivElement>
   ) {
-    const [raw, setRaw] = useState<boolean>(false);
-    const changeRaw = () => setRaw((raw) => !raw);
-    const sendReply = () => {
-      // DB に対して返信の処理を行う
+    /* ===== 返信先投稿のロジック ===== */
+    const user = useUser();
+    const [rawPost, setRawPost] = useState<boolean>(false);
+    const changeRawPost = () => setRawPost((rawPost) => !rawPost);
+    // const changeRawCreate = () => setRaw((raw) => !raw);
+    const changeRawCreate = () => {
+      alert('PO');
+    };
+
+    /* ===== 返信のロジック ===== */
+
+    const [rawReply, setRawReply] = useState<boolean>(false);
+    const changeRawReply = () => setRawReply((rawReply) => !rawReply);
+    const [replyInput, setReplyInput] = useState<PostInput>({
+      user_id: '',
+      display_name: '',
+      profile_image: '',
+      content: '',
+      images: [],
+    });
+    const content_ref = useRef<HTMLTextAreaElement | null>(null);
+    const sendReply = async () => {
+      if (content_ref.current !== null) {
+        const got_images = await getImages(content_ref.current.value);
+        const replyData: PostInput = replyInput;
+        replyData.content = content_ref.current.value;
+        replyData.images = got_images;
+        const reply_id = await replyToPost(post_id, replyData);
+        console.log('replied with reply_id = ', reply_id);
+      }
       handleClose();
     };
 
-    const Action = () => (
-      <Stack direction='row'>
-        <IconButton onClick={changeRaw}>
-          {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-        </IconButton>
-        {/* <Details postId={postId} /> */}
-      </Stack>
-    );
-
+    const router = useRouter();
     const theme = useTheme();
+
+    useEffect(() => {
+      if (user) {
+        setReplyInput({
+          user_id: user.uid,
+          display_name: user.displayName ?? '',
+          profile_image: user.photoURL ?? '',
+          content: replyInput.content,
+          images: [],
+        });
+      } else {
+        router.push('/login');
+      }
+    }, [user, router, replyInput]);
+
+    const [replyPreview, setReplyPreview] = useState<JSX.Element>(<></>);
+
+    const updateReplyPreview = async () => {
+      if (content_ref.current !== null) {
+        const got_images = await getImages(content_ref.current.value);
+        setReplyPreview(<RenderContent content={content_ref.current.value} images={got_images} />);
+      }
+    };
+
     return (
       <Card sx={style} ref={ref} {...cardProps}>
         <CardHeader
           avatar={<Avatar src={profile_image as string} aria-label='icon' />}
-          action={<Action />}
+          action={
+            <Stack direction='row'>
+              <IconButton onClick={changeRawPost}>
+                {!rawPost ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+              </IconButton>
+              {/* <Details postId={postId} /> */}
+            </Stack>
+          }
           title={display_name + '@' + user_id}
         />
-        <CardContent>{!raw ? RenderedContent : <Typography>{content}</Typography>}</CardContent>
+        <CardContent>{!rawPost ? RenderedContent : <Typography>{content}</Typography>}</CardContent>
         <CardHeader
-          avatar={<Avatar src={getCookie('photoURL') as string} aria-label='icon' />}
-          title={getCookie('userName') + '@' + getCookie('userId')}
+          avatar={<Avatar src={user?.photoURL ?? ''} aria-label='icon' />}
+          action={
+            <Stack direction='row'>
+              <IconButton onClick={changeRawReply}>
+                {!rawReply ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+              </IconButton>
+              {/* <Details postId={postId} /> */}
+            </Stack>
+          }
+          title={(user?.displayName ?? '') + '@' + (user?.uid ?? '')}
         />
         <CardContent>
           <TextareaAutosize
@@ -99,7 +164,11 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
               color: theme.palette.text.primary,
               fontSize: 18,
             }}
+            ref={content_ref}
+            onChange={updateReplyPreview}
+            hidden={rawReply}
           />
+          {rawReply && replyPreview}
         </CardContent>
         <CardActions disableSpacing>
           <IconButton aria-label='add image' sx={{ display: 'none' }}>
@@ -114,7 +183,6 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
             onClick={sendReply}
             aria-label='send reply'
             sx={{ width: 'auto', marginRight: 0, marginLeft: 'auto' }}
-            disabled
           >
             <PublishIcon />
             返信
