@@ -53,7 +53,7 @@ const LeftMenuBar = () => {
               {matches && <ListItemText primary='Home' primaryTypographyProps={{ fontSize: 20 }} />}
             </ListItemButton>
           </ListItem>
-          <ListItem>
+          {/* <ListItem>
             <ListItemButton>
               <ListItemIcon>
                 <Badge badgeContent={notificationCount} color='secondary'>
@@ -84,7 +84,7 @@ const LeftMenuBar = () => {
                 <ListItemText primary='Settings' primaryTypographyProps={{ fontSize: 20 }} />
               )}
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
           <ListItem>
             <ListItemButton onClick={
               () => {

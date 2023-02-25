@@ -115,6 +115,7 @@ const ReplyingToPost = React.forwardRef<HTMLDivElement, ReplyingToPostProps>(
             onClick={sendReply}
             aria-label='send reply'
             sx={{ width: 'auto', marginRight: 0, marginLeft: 'auto' }}
+            disabled
           >
             <PublishIcon />
             返信
