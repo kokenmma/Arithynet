@@ -42,7 +42,7 @@ export const addPost = async (post: PostInput): Promise<string> => {
   // Add Post to firebase
   const newRecord: PostDB = {
     ...post,
-    created_at: new Date().toDateString(),
+    created_at: new Date(),
     like_count: [],
     repost_count: 0,
     reply_count: 0,
@@ -114,7 +114,7 @@ export const rePost = async (post_id: string, user_id: string): Promise<void> =>
   // Add Post to firebase
   const reposted_byAddedPost: WithFieldValue<PostDB> = {
     reposted_by: [user_id, ...reposted_by],
-    created_at: created_at.toDateString(),
+    created_at: created_at,
     ...rest,
   };
   await setDoc(docRef, reposted_byAddedPost);
@@ -144,7 +144,7 @@ export const replyToPost = async (post_id: string, reply_input: PostInput): Prom
   // Update reply
   const reply: WithFieldValue<PostDB> = {
     ...reply_input,
-    created_at: new Date().toDateString(),
+    created_at: new Date(),
     like_count: [],
     repost_count: 0,
     reply_count: 0,
