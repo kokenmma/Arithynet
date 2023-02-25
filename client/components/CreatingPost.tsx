@@ -10,14 +10,18 @@ import Fab from '@mui/material/Fab';
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import PublishIcon from '@mui/icons-material/Publish';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { CardProps } from '@mui/material';
 import { PostInput } from '../types/Post';
 import { getImages } from '../services/latexserver';
 import { addPost } from '../services/PostService';
 import { useUser } from '../lib/auth';
+import RenderContent from './RenderContent';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -42,6 +46,11 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   { handleClose, ...cardProps }: CreatingPostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
+  const [raw, setRaw] = useState<boolean>(false);
+  // const changeRawCreate = () => setRaw((raw) => !raw);
+  const changeRawCreate = () => {
+    alert('PO');
+  };
   const user = useUser();
   const router = useRouter();
   const [postInput, setPostInput] = useState<PostInput>({
@@ -55,8 +64,7 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   const sendPost = async () => {
     if (content_ref.current !== null) {
       const got_images = await getImages(content_ref.current.value);
-      console.log("got_images", got_images)
-      const postData : PostInput = postInput;
+      const postData: PostInput = postInput;
       postData.content = content_ref.current.value;
       postData.images = got_images;
       await addPost(postData);
@@ -78,12 +86,33 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
     } else {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [user, router, postInput]);
+
+  const [preview, setPreview] = useState<JSX.Element>(<></>);
+
+  const updatePreview = async (value: any) => {
+    if (content_ref.current !== null) {
+      const got_images = await getImages(content_ref.current.value);
+      setPreview(<RenderContent content={content_ref.current.value} images={got_images} />);
+    }
+  };
 
   return (
     <Card sx={style} ref={ref} {...cardProps}>
       <CardHeader
         avatar={<Avatar src={postInput.profile_image} aria-label='icon' />}
+        action={
+          <Stack direction='row'>
+            <IconButton
+              onClick={() => {
+                setRaw((raw) => !raw);
+              }}
+            >
+              {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+            </IconButton>
+            {/* <Details postId={postId} /> */}
+          </Stack>
+        }
         title={postInput.display_name + '@' + postInput.user_id}
       />
       <CardContent>
@@ -102,7 +131,11 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
             fontSize: 18,
           }}
           ref={content_ref}
+          onChange={updatePreview}
+          maxRows={10}
+          hidden={raw}
         />
+        {raw ? preview : <></>}
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label='add image' sx={{ display: 'none' }}>

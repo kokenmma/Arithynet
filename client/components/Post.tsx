@@ -55,7 +55,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
   const changeRaw = () => setRaw((raw) => !raw);
 
   const handleRepost = async () => {setIsReposted((isReposted) => !isReposted)}
-  ;
+  
   const handleLike = async () => {
     if(!user?.uid) return;
     if(isLiked){
@@ -67,6 +67,11 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
     }
     setIsLiked((isLiked) => !isLiked);
   }
+
+  useEffect(() => {
+    if(!user?.uid) return;
+    setIsLiked(like_count.includes(user.uid));
+  }, []);
   
   const Action = () => (
     <Stack direction='row'>
@@ -117,7 +122,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
           />
         </Modal>
         <Typography variant='body2'>{reply_count}</Typography>
-        <IconButton aria-label='repost'>
+        <IconButton aria-label='repost' disabled>
           {/* Repost の処理の呼び出しを行う */}
           <RepeatIcon sx={isReposted ? { color: 'green' } : {}} />
         </IconButton>
@@ -127,7 +132,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
           <FavoriteIcon sx={isLiked ? { color: 'green' } : {}} />
         </IconButton>
         <Typography variant='body2'>{like_count.length}</Typography>
-        <IconButton aria-label='share'>
+        <IconButton aria-label='share' disabled>
           <ShareIcon />
         </IconButton>
       </CardActions>
