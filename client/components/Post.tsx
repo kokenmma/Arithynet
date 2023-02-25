@@ -67,6 +67,11 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
     }
     setIsLiked((isLiked) => !isLiked);
   }
+
+  useEffect(() => {
+    if(!user?.uid) return;
+    setIsLiked(like_count.includes(user.uid));
+  }, []);
   
   const Action = () => (
     <Stack direction='row'>
