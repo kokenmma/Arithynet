@@ -11,7 +11,7 @@ export interface Post {
   reposted_by: string[];
 }
 
-export type PostDB = Omit<Post, 'created_at'> & { created_at: string };
+export type PostDB = Omit<Post, 'created_at'> & { created_at: Date };
 
 export interface PostInput
   extends Omit<

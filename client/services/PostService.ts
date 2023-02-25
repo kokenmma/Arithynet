@@ -42,7 +42,7 @@ export const addPost = async (post: PostInput): Promise<string> => {
   // Add Post to firebase
   const newRecord: PostDB = {
     ...post,
-    created_at: new Date().toDateString(),
+    created_at: new Date(),
     like_count: [],
     repost_count: 0,
     reply_count: 0,
