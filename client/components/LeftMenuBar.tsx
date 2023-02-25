@@ -11,6 +11,7 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import CreateIcon from '@mui/icons-material/Create';
+import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
@@ -18,6 +19,7 @@ import Divider from '@mui/material/Divider';
 import Fab from '@mui/material/Fab';
 import Modal from '@mui/material/Modal';
 import CreatingPost from './CreatingPost';
+import { useRouter } from 'next/router';
 
 export const LeftMenuBarWidthWhenGreaterThanMd = 240;
 export const LeftMenuBarWidthWhenLessThanMd = 70;
@@ -32,6 +34,7 @@ const LeftMenuBar = () => {
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
   const matches = useMediaQuery(theme.breakpoints.up('md'));
+  const router = useRouter();
 
   return (
     <Box
@@ -79,6 +82,20 @@ const LeftMenuBar = () => {
               </ListItemIcon>
               {matches && (
                 <ListItemText primary='Settings' primaryTypographyProps={{ fontSize: 20 }} />
+              )}
+            </ListItemButton>
+          </ListItem>
+          <ListItem>
+            <ListItemButton onClick={
+              () => {
+                router.push('/logout')
+              }
+            }>
+              <ListItemIcon>
+                <LogoutIcon />
+              </ListItemIcon>
+              {matches && (
+                <ListItemText primary='Logout' primaryTypographyProps={{ fontSize: 20 }} />
               )}
             </ListItemButton>
           </ListItem>
