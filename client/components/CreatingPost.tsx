@@ -54,7 +54,8 @@ const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(functio
   const content_ref = useRef<HTMLTextAreaElement | null>(null);
   const sendPost = async () => {
     if (content_ref.current !== null) {
-      const got_images = await getImages(postInput.content);
+      const got_images = await getImages(content_ref.current.value);
+      console.log("got_images", got_images)
       const postData : PostInput = postInput;
       postData.content = content_ref.current.value;
       postData.images = got_images;
