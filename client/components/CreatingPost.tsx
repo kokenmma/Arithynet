@@ -50,8 +50,11 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
   { handleClose, ...cardProps }: CreatingPostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
-  const [raw2, setRaw2] = useState<boolean>(false);
-  const changeRawCreate = () => setRaw2((raw2) => !raw2);
+  const [raw, setRaw] = useState<boolean>(false);
+  // const changeRawCreate = () => setRaw((raw) => !raw);
+  const changeRawCreate = ()=>{
+    alert("PO");
+  }
   const user = useUser();
   const router = useRouter();
   const [postInput, setPostInput] = useState<PostInput>({
@@ -98,21 +101,23 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
     }
   };
 
-  const Action = () => (
-    <Stack direction='row'>
-      <IconButton onClick={changeRawCreate}>
-        {!raw2 ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-      </IconButton>
-      {/* <Details postId={postId} /> */}
-    </Stack>
-  );
-
   return (
     <Card sx={style} ref={ref} {...cardProps}>
       <CardHeader
         avatar={<Avatar src={postInput.profile_image} aria-label='icon' />}
+        action={
+          <Stack direction='row'>
+          <IconButton onClick={
+            ()=>{
+              setRaw((raw) => !raw);
+            }
+          }>
+            {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+          </IconButton>
+          {/* <Details postId={postId} /> */}
+        </Stack>
+        }
         title={postInput.display_name + '@' + postInput.user_id}
-        // action={<Action />}
       />
       <CardContent>
           <TextareaAutosize
@@ -131,8 +136,12 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
             }}
             ref={content_ref}
             onChange={updatePreview}
+            maxRows={10}
+            hidden={raw}
           />
-          {preview}
+        {raw ? (
+          preview
+        ):<></>}
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label='add image' sx={{ display: 'none' }}>

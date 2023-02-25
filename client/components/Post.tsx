@@ -55,7 +55,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
   const changeRaw = () => setRaw((raw) => !raw);
 
   const handleRepost = async () => {setIsReposted((isReposted) => !isReposted)}
-  ;
+  
   const handleLike = async () => {
     if(!user?.uid) return;
     if(isLiked){

@@ -11,7 +11,12 @@ export interface Post {
   reposted_by: string[];
 }
 
-export type PostDB = Omit<Post, 'created_at'> & { created_at: Date };
+export type PostDB = Omit<Post, 'created_at'> & { created_at: FirebaseTimestamp };
+
+interface FirebaseTimestamp {
+  seconds: number;
+  nanoseconds: number;
+}
 
 export interface PostInput
   extends Omit<

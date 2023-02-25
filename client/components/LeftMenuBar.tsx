@@ -103,6 +103,11 @@ const LeftMenuBar = () => {
           onClose={handleClose}
           aria-labelledby='modal-modal-title'
           aria-describedby='modal-modal-description'
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            top: '15%',
+          }}
         >
           <CreatingPost handleClose={handleClose} />
         </Modal>

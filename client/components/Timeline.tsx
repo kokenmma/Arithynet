@@ -57,7 +57,7 @@ const Timeline = () => {
       const posts: PostWithId[] = [];
       querySnapshot.forEach((doc: any) => {
         const { created_at, ...rest }: PostDB = doc.data();
-        const data: PostWithId = { created_at: new Date(created_at), ...rest, post_id: doc.id };
+        const data: PostWithId = { created_at: new Date(created_at.seconds * 1000), ...rest, post_id: doc.id };
         posts.push(data);
       });
       setPosts(posts);
