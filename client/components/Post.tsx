@@ -18,7 +18,7 @@ import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
 import Details from './Details';
 import ReplyingToPost from './ReplyingToPost';
-import { CardProps } from '@mui/material';
+import { CardProps, IconButtonProps } from '@mui/material';
 import type { PostWithId } from '../types/Post';
 import RenderContent from './RenderContent';
 import { removeLikeCount, upLikeCount, upreplyCount } from '../services/PostService';
@@ -54,25 +54,27 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
   const handleClose = () => setIsOpen(false);
   const changeRaw = () => setRaw((raw) => !raw);
 
-  const handleRepost = async () => {setIsReposted((isReposted) => !isReposted)}
-  
+  const handleRepost = async () => {
+    setIsReposted((isReposted) => !isReposted);
+  };
+
   const handleLike = async () => {
-    if(!user?.uid) return;
-    if(isLiked){
+    if (!user?.uid) return;
+    if (isLiked) {
       // いいねを取り消す
       await removeLikeCount(post_id, user.uid);
-    }else{
+    } else {
       // いいねをする
       await upLikeCount(post_id, user.uid);
     }
     setIsLiked((isLiked) => !isLiked);
-  }
+  };
 
   useEffect(() => {
-    if(!user?.uid) return;
+    if (!user?.uid) return;
     setIsLiked(like_count.includes(user.uid));
-  }, []);
-  
+  }, [user, like_count]);
+
   const Action = () => (
     <Stack direction='row'>
       <IconButton onClick={changeRaw}>
@@ -86,6 +88,26 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
     () => <RenderContent content={content} images={images} />,
     [content, images]
   );
+
+  interface ExpandMoreProps extends IconButtonProps {
+    expand: boolean;
+  }
+
+  const ExpandMore: NextPage<ExpandMoreProps> = (props: ExpandMoreProps) => {
+    const { expand, ...other } = props;
+    return (
+      <IconButton
+        {...other}
+        sx={{
+          transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+          marginLeft: 'auto',
+          transition: theme.transitions.create('transform', {
+            duration: theme.transitions.duration.shortest,
+          }),
+        }}
+      />
+    );
+  };
 
   return (
     <Card sx={{ width: 600 }} ref={ref} {...card_props}>
@@ -129,7 +151,7 @@ const Post: NextPage<PostProps> = React.forwardRef<HTMLDivElement, PostProps>(fu
         <Typography variant='body2'>{repost_count}</Typography>
         <IconButton aria-label='favorite' onClick={handleLike}>
           {/* Favorite の処理の呼び出しを行う */}
-          <FavoriteIcon sx={isLiked ? { color: 'green' } : {}} />
+          <FavoriteIcon sx={isLiked ? { color: 'red' } : {}} />
         </IconButton>
         <Typography variant='body2'>{like_count.length}</Typography>
         <IconButton aria-label='share' disabled>
