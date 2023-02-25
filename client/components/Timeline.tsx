@@ -5,7 +5,7 @@ import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Post from './Post';
 import { PostDB, PostWithId } from '../types/Post';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
 const Timeline = () => {
@@ -53,7 +53,7 @@ const Timeline = () => {
   const [posts, setPosts] = useState<PostWithId[]>([]);
 
   useEffect(() => {
-    onSnapshot(collection(db, 'posts'), (querySnapshot) => {
+    onSnapshot(query(collection(db, 'posts'), orderBy('created_at','desc')), (querySnapshot) => {
       const posts: PostWithId[] = [];
       querySnapshot.forEach((doc: any) => {
         const { created_at, ...rest }: PostDB = doc.data();
