@@ -55,25 +55,25 @@ func (t *Tikz) MakeDir() (*Tikz, error) {
 	return t, nil
 }
 
-func (t *Tikz) Compile() (string, error) {
+func (t *Tikz) Compile() ([]byte, error) {
 	cmd := exec.Command("tectonic", "-X", "compile", "-o", t.dirname, "-")
 	cmd.Stdin = strings.NewReader(t.preamble + t.index + t.postamble)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("error compile code: %v\n%s", err, stdoutStderr)
+		return nil, fmt.Errorf("error compile code: %v\n%s", err, stdoutStderr)
 	}
 
-	cmd = exec.Command("pdftocairo", "-svg", t.dirname+"/texput.pdf", t.dirname+"/texput.svg")
+	cmd = exec.Command("pdftocairo", "-png", t.dirname+"/texput.pdf", t.dirname+"/texput")
 	stdoutStderr, err = cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("error pdf2svg: %v\n%s", err, stdoutStderr)
+		return nil, fmt.Errorf("error pdf2png: %v\n%s", err, stdoutStderr)
 	}
 
-	f, err := ioutil.ReadFile(t.dirname + "/texput.svg")
+	f, err := ioutil.ReadFile(t.dirname + "/texput-1.png")
 	if err != nil {
-		return "", fmt.Errorf("error svg2string: %v", err)
+		return nil, fmt.Errorf("error read png: %v", err)
 	}
-	return string(f), nil
+	return f, nil
 }
 
 func (t *Tikz) RmoveDir() error {
@@ -84,10 +84,10 @@ func (t *Tikz) RmoveDir() error {
 	return nil
 }
 
-func TikzWrapper(index string) (string, error) {
+func TikzWrapper(index string) ([]byte, error) {
 	res, err := NewTikz(index).MakeDir()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer func() {
 		if err := res.RmoveDir(); err != nil {
