@@ -67,7 +67,7 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
   const content_ref = useRef<HTMLTextAreaElement | null>(null);
   const sendPost = async () => {
     if (content_ref.current !== null) {
-      const got_images = await getImages(postInput.content);
+      const got_images = await getImages(content_ref.current.value);
       const postData: PostInput = postInput;
       postData.content = content_ref.current.value;
       postData.images = got_images;
