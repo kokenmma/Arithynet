@@ -14,7 +14,6 @@ const Index = () => {
   }, [user]);
   return (
     <Container>
-      {user?.displayName}
       <Stack direction='row' divider={<Divider orientation='vertical' flexItem />}>
         <LeftMenuBar />
         <Timeline />
