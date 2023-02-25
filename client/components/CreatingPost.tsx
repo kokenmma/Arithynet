@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { NextPage } from 'next';
-import { getAuth, onAuthStateChanged, updateCurrentUser } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -27,9 +26,9 @@ import RenderContent from './RenderContent';
 const style = {
   position: 'absolute' as 'absolute',
   padding: 0,
-  top: 180,
+  top: 150,
   left: '50%',
-  transform: 'translate(-50%, -50%)',
+  transform: 'translate(-50%, 0%)',
   width: 680,
   bgcolor: 'background.default',
   border: 'none',
@@ -41,20 +40,19 @@ const style = {
   },
 };
 
-type CreatingPostProps = CardProps & { handleClose: () => void };
+interface CreatingPostProps extends CardProps {
+  handleClose: () => void;
+}
 
-const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
-  HTMLDivElement,
-  CreatingPostProps
->(function CreatingPostImpl(
+const CreatingPost = React.forwardRef<HTMLDivElement, CreatingPostProps>(function CreatingPostImpl(
   { handleClose, ...cardProps }: CreatingPostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
   const [raw, setRaw] = useState<boolean>(false);
   // const changeRawCreate = () => setRaw((raw) => !raw);
-  const changeRawCreate = ()=>{
-    alert("PO");
-  }
+  const changeRawCreate = () => {
+    alert('PO');
+  };
   const user = useUser();
   const router = useRouter();
   const [postInput, setPostInput] = useState<PostInput>({
@@ -94,7 +92,7 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
 
   const [preview, setPreview] = useState<JSX.Element>(<></>);
 
-  const updatePreview = async (value:any) => {
+  const updatePreview = async (value: any) => {
     if (content_ref.current !== null) {
       const got_images = await getImages(content_ref.current.value);
       setPreview(<RenderContent content={content_ref.current.value} images={got_images} />);
@@ -107,41 +105,39 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
         avatar={<Avatar src={postInput.profile_image} aria-label='icon' />}
         action={
           <Stack direction='row'>
-          <IconButton onClick={
-            ()=>{
-              setRaw((raw) => !raw);
-            }
-          }>
-            {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-          </IconButton>
-          {/* <Details postId={postId} /> */}
-        </Stack>
+            <IconButton
+              onClick={() => {
+                setRaw((raw) => !raw);
+              }}
+            >
+              {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+            </IconButton>
+            {/* <Details postId={postId} /> */}
+          </Stack>
         }
         title={postInput.display_name + '@' + postInput.user_id}
       />
       <CardContent>
-          <TextareaAutosize
-            aria-label='posttext'
-            placeholder='投稿を書き込んでください'
-            minRows={3}
-            style={{
-              width: '100%',
-              boxSizing: 'border-box',
-              border: 'none',
-              resize: 'none',
-              outline: 'none',
-              backgroundColor: 'inherit',
-              color: theme.palette.text.primary,
-              fontSize: 18,
-            }}
-            ref={content_ref}
-            onChange={updatePreview}
-            maxRows={10}
-            hidden={raw}
-          />
-        {raw ? (
-          preview
-        ):<></>}
+        <TextareaAutosize
+          aria-label='posttext'
+          placeholder='投稿を書き込んでください'
+          minRows={3}
+          style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            border: 'none',
+            resize: 'none',
+            outline: 'none',
+            backgroundColor: 'inherit',
+            color: theme.palette.text.primary,
+            fontSize: 18,
+          }}
+          ref={content_ref}
+          onChange={updatePreview}
+          maxRows={10}
+          hidden={raw}
+        />
+        {raw && preview}
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label='add image' sx={{ display: 'none' }}>

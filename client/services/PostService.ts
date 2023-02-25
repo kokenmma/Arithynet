@@ -124,10 +124,10 @@ export const rePost = async (post_id: string, user_id: string): Promise<void> =>
   });
 };
 
-export const getReply = async (post_id: string): Promise<PostWithId[]> => {
+export const getReplies = async (post_id: string): Promise<PostWithId[]> => {
   // Get Posts from firebase for timeline
   const querySnapshot: QuerySnapshot<PostDB> = await getDocs(
-    collection(db, 'posts', post_id, 'replys') as CollectionReference<PostDB>
+    collection(db, 'posts', post_id, 'replies') as CollectionReference<PostDB>
   );
   const posts: PostWithId[] = [];
   querySnapshot.forEach((doc: QueryDocumentSnapshot<PostDB>) => {
@@ -151,7 +151,7 @@ export const replyToPost = async (post_id: string, reply_input: PostInput): Prom
     reposted_by: [],
   };
   const docRef: DocumentReference<PostDB> = await addDoc(
-    collection(db, 'posts', post_id, 'replys') as CollectionReference<PostDB>,
+    collection(db, 'posts', post_id, 'replies') as CollectionReference<PostDB>,
     reply
   );
   console.log('Document written with ID: ', docRef.id);
