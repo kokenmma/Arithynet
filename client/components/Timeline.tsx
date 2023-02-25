@@ -53,7 +53,7 @@ const Timeline = () => {
   const [posts, setPosts] = useState<PostWithId[]>([]);
 
   useEffect(() => {
-    onSnapshot(query(collection(db, 'posts'), orderBy('created_at')), (querySnapshot) => {
+    onSnapshot(query(collection(db, 'posts'), orderBy('created_at','desc')), (querySnapshot) => {
       const posts: PostWithId[] = [];
       querySnapshot.forEach((doc: any) => {
         const { created_at, ...rest }: PostDB = doc.data();
