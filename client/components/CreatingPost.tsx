@@ -50,8 +50,8 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
   { handleClose, ...cardProps }: CreatingPostProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
-  const [raw, setRaw] = useState<boolean>(false);
-  const changeRaw = () => setRaw((raw) => !raw);
+  const [raw2, setRaw2] = useState<boolean>(false);
+  const changeRawCreate = () => setRaw2((raw2) => !raw2);
   const user = useUser();
   const router = useRouter();
   const [postInput, setPostInput] = useState<PostInput>({
@@ -91,19 +91,17 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
 
   const [preview, setPreview] = useState<JSX.Element>(<></>);
 
-  useEffect(() => {
-    (async () => {
-      if (content_ref.current !== null) {
-        const got_images = await getImages(content_ref.current.value);
-        setPreview(<RenderContent content={content_ref.current.value} images={got_images} />);
-      }
-    })();
-  }, [content_ref]);
+  const updatePreview = async (value:any) => {
+    if (content_ref.current !== null) {
+      const got_images = await getImages(content_ref.current.value);
+      setPreview(<RenderContent content={content_ref.current.value} images={got_images} />);
+    }
+  };
 
   const Action = () => (
     <Stack direction='row'>
-      <IconButton onClick={changeRaw}>
-        {!raw ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+      <IconButton onClick={changeRawCreate}>
+        {!raw2 ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
       </IconButton>
       {/* <Details postId={postId} /> */}
     </Stack>
@@ -114,10 +112,9 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
       <CardHeader
         avatar={<Avatar src={postInput.profile_image} aria-label='icon' />}
         title={postInput.display_name + '@' + postInput.user_id}
-        action={<Action />}
+        // action={<Action />}
       />
       <CardContent>
-        {!raw ? (
           <TextareaAutosize
             aria-label='posttext'
             placeholder='投稿を書き込んでください'
@@ -133,10 +130,9 @@ const CreatingPost: NextPage<CreatingPostProps> = React.forwardRef<
               fontSize: 18,
             }}
             ref={content_ref}
+            onChange={updatePreview}
           />
-        ) : (
-          preview
-        )}
+          {preview}
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label='add image' sx={{ display: 'none' }}>
